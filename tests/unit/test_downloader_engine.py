@@ -164,3 +164,14 @@ def test_every_engine_import_resolves_to_a_vendored_module():
             elif isinstance(node, ast.Import):
                 missing.extend(f'{path.name}: {a.name}' for a in node.names if not exists(a.name))
     assert missing == []
+
+
+def test_format_preferences_start_as_what_the_library_imports(engine):
+    config = engine.engine('core.config').config
+    assert config.get('SUPPORTED_FORMATS') == ['epub', 'pdf', 'mobi']
+    assert config.get('SUPPORTED_AUDIOBOOK_FORMATS') == ['m4b', 'm4a', 'mp4']
+    registry = engine.engine('core.settings_registry')
+    registry.save_config_file('general', dict(registry.load_config_file('general'), SUPPORTED_FORMATS=['epub']))
+    runtime.load_settings()  # an administrator's choice is kept
+    config.refresh(force=True)
+    assert config.get('SUPPORTED_FORMATS') == ['epub']

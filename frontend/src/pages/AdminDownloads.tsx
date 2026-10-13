@@ -2,7 +2,6 @@ import { useEffect, useId, useState } from 'react';
 import { Link } from 'wouter';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, ChevronLeft, Download } from 'lucide-react';
-import { orderTabs } from '../lib/downloadSettings';
 import {
   getDownloader,
   getDownloaderQueue,
@@ -42,9 +41,11 @@ export function AdminDownloads() {
   const formId = useId();
   const [actionError, setActionError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string | null>(null);
+  // A switch shows what was asked for straight away; the server's answer replaces it.
+  const [pending, setPending] = useState<{ enabled?: boolean; allow_mobi?: boolean }>({});
 
   const status = useQuery({ queryKey: ['admin', 'downloads'], queryFn: getDownloader, retry: false });
-  const enabled = !!status.data?.enabled;
+  const enabled = pending.enabled ?? !!status.data?.enabled;
   const settings = useQuery({ queryKey: ['admin', 'downloads', 'settings'], queryFn: getDownloadSettings, retry: false });
   const queue = useQuery({
     queryKey: ['admin', 'downloads', 'queue'],
@@ -54,13 +55,15 @@ export function AdminDownloads() {
       ['queued', 'resolving', 'locating', 'downloading'].includes(task.status)) ? 3000 : false,
   });
 
-  const tabs = orderTabs(settings.data?.tabs ?? []);
+  // The server sends the tabs in the order an administrator needs them.
+  const tabs = settings.data?.tabs ?? [];
   useEffect(() => {
     if (tabs.length && !tabs.some((tab) => tab.name === activeTab)) setActiveTab(tabs[0].name);
   }, [tabs, activeTab]);
 
   const update = useMutation({
     mutationFn: updateDownloader,
+    onSettled: () => setPending({}),
     onSuccess: (result: DownloaderStatus, changes) => {
       setActionError(null);
       queryClient.setQueryData(['admin', 'downloads'], result);
@@ -126,7 +129,10 @@ export function AdminDownloads() {
         <h2 id={`${formId}-switch`}>{t('Downloader')}</h2>
         <label className={styles.switchRow}>
           <input type="checkbox" checked={enabled} disabled={update.isPending}
-            onChange={(event) => update.mutate({ enabled: event.target.checked })} />
+            onChange={(event) => {
+              setPending({ enabled: event.target.checked });
+              update.mutate({ enabled: event.target.checked });
+            }} />
           <span>
             <span className={styles.switchLabel}>{t('Allow downloads')}</span>
             <span className={styles.hint}>{t('Who may download, and whether they need approval, is set under Book sources.')}</span>
@@ -144,8 +150,11 @@ export function AdminDownloads() {
               </select>
             </label>
             <label className={styles.switchRow}>
-              <input type="checkbox" checked={config.allow_mobi} disabled={update.isPending}
-                onChange={(event) => update.mutate({ allow_mobi: event.target.checked })} />
+              <input type="checkbox" checked={pending.allow_mobi ?? config.allow_mobi} disabled={update.isPending}
+                onChange={(event) => {
+                  setPending({ allow_mobi: event.target.checked });
+                  update.mutate({ allow_mobi: event.target.checked });
+                }} />
               <span>{t('Allow direct DRM-free MOBI 6 books')}</span>
             </label>
             <p className={styles.hint}>

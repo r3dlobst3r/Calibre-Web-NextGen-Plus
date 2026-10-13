@@ -82,11 +82,29 @@ def start():
     orchestrator.start()
 
 
+# What the library can import. The engine's own defaults also look for AZW3, FB2,
+# comics and MP3s, which would only be listed as "format not supported" here.
+IMPORTABLE_DEFAULTS = {
+    'SUPPORTED_FORMATS': ['epub', 'pdf', 'mobi'],
+    'SUPPORTED_AUDIOBOOK_FORMATS': ['m4b', 'm4a', 'mp4'],
+}
+
+
 def load_settings():
-    """Register every engine settings tab (download clients register on import)."""
+    """Register every engine settings tab (download clients register on import).
+
+    On first use, the format preferences start as what CWNG can import; an
+    administrator's later choice is stored and kept.
+    """
     engine('config.settings')
     engine('download.clients.settings')
     engine('release_sources')._ensure_builtin_sources_registered()
+    registry = engine('core.settings_registry')
+    general = registry.load_config_file('general')
+    missing = {key: value for key, value in IMPORTABLE_DEFAULTS.items() if key not in general}
+    if missing:
+        registry.save_config_file('general', dict(general, **missing))
+        engine('core.config').config.refresh(force=True)
 
 
 class LocalEngine:
