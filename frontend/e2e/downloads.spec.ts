@@ -45,13 +45,15 @@ const releases = {
   ],
 };
 
-async function fixture(page: Page, options: { connections?: unknown[]; searchError?: boolean } = {}) {
+async function fixture(page: Page, options: { connections?: unknown[]; searchError?: boolean; noSources?: boolean; admin?: boolean } = {}) {
   const jobs: { id: string; state: string; title: string; result?: unknown }[] = [];
   const posted: Record<string, unknown>[] = [];
   const searches: string[] = [];
   await page.route('**/api/v1/auth/me', async (route) => {
     const response = await route.fetch();
-    await route.fulfill({ response, json: { ...await response.json(), acquisition_access: true } });
+    const me = await response.json();
+    await route.fulfill({ response, json: { ...me, acquisition_access: true,
+      ...(options.admin === false ? { role: { ...me.role, admin: false } } : {}) } });
   });
   await page.route('**/api/v1/acquisition**', async (route) => {
     const url = new URL(route.request().url());
@@ -70,7 +72,8 @@ async function fixture(page: Page, options: { connections?: unknown[]; searchErr
       }
       return route.fulfill({ json: { title: 'Downloads', protocol: 'downloader', navigation: [], pagination: [],
         searches: [], groups: [], facets: [],
-        publications: [book(), book({ identity: 'owned', title: 'Owned Book', library_book_id: 1 })] } });
+        publications: options.noSources ? [book({ navigation: [] })]
+          : [book(), book({ identity: 'owned', title: 'Owned Book', library_book_id: 1 })] } });
     }
     if (url.pathname.endsWith('/jobs') && route.request().method() === 'POST') {
       posted.push(route.request().postDataJSON());
@@ -131,6 +134,44 @@ test('the download service explains why it cannot search', async ({ page }) => {
   await page.goto('/app/?q=moby&scope=get');
   await expect(page.getByRole('alert').filter({ hasText: 'Book search is not available right now' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
+});
+
+test('an admin is told when no download source can be searched yet', async ({ page }) => {
+  await fixture(page, { noSources: true });
+  await page.goto('/app/?q=moby&scope=get');
+  const notice = page.getByTestId('get-more-no-sources');
+  await expect(notice).toContainText('No download source can be searched yet');
+  await expect(notice.getByRole('link', { name: 'Open Downloads' })).toHaveAttribute('href', /\/admin\/downloads$/);
+  await expect(page.getByRole('button', { name: 'Find downloads' })).toHaveCount(0);
+});
+
+test('a reader without admin rights is told to ask an administrator', async ({ page }) => {
+  await fixture(page, { noSources: true, admin: false });
+  await page.goto('/app/?q=moby&scope=get');
+  const notice = page.getByTestId('get-more-no-sources');
+  await expect(notice).toContainText('Ask an administrator');
+  await expect(notice.getByRole('link')).toHaveCount(0);
+});
+
+test('Admin → Downloads names a switched-on source that is missing its address', async ({ page }) => {
+  await page.route('**/api/v1/admin/downloads**', async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/queue')) return route.fulfill({ json: { tasks: [] } });
+    if (url.pathname.endsWith('/settings')) return route.fulfill({ json: { groups: [], tabs: [] } });
+    return route.fulfill({ json: {
+      enabled: true, connection: { ...downloader, config: { allow_mobi: false, metadata_provider: 'openlibrary' } },
+      sources: { ebook: [], audiobook: [] },
+      source_problems: [{ source: 'direct_download', reason: 'needs_mirror' },
+                        { source: 'audiobookbay', reason: 'needs_hostname' }],
+      acquisition: { enabled: true, migration_status: 'ready', runtime: { available: true, reasons: [] } },
+    } });
+  });
+  await page.goto('/app/admin/downloads');
+  const problems = page.getByTestId('downloads-source-problems');
+  await expect(problems).toContainText("Add an Anna's Archive mirror URL under Mirrors below.");
+  await expect(problems).toContainText('AudiobookBay is switched on but has no hostname.');
+  await expect(page.getByText('No ebook source can be searched yet.')).toBeVisible();
+  await expectNoSeriousViolations(page);
 });
 
 test('an audiobook is found and requested from the same search', async ({ page }) => {
