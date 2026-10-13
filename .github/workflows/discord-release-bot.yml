@@ -16,6 +16,9 @@ permissions:
 
 jobs:
   github-releases-to-discord:
+    # Upstream's maintainer automation (its accounts, secrets and channels); a fork such as
+    # Calibre-Web NextGen+ skips it.
+    if: github.repository == 'new-usemame/Calibre-Web-NextGen'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

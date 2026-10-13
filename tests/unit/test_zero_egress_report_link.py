@@ -77,7 +77,7 @@ def test_module_never_transmits():
 def test_url_targets_our_own_tracker(matched_route):
     matched_route("/book/<int:book_id>")
     assert report_link.build_issue_url("500 Internal Server Error").startswith(
-        "https://github.com/new-usemame/Calibre-Web-NextGen/issues/new"
+        "https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/issues/new"
     )
 
 

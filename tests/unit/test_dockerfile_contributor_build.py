@@ -58,12 +58,17 @@ PRIVATE_MIRROR = "ghcr.io/new-usemame/pbs-cache"
 # takes the credential-free upstream path, the same one a contributor's local
 # `docker build .` already uses.
 #
-# Every non-fork context still resolves to `ghcr`: on pushes, tags and
-# `workflow_dispatch` there is no `pull_request` payload, so the left operand is
-# null, `null == true` is false, and the `||` returns `'ghcr'`. Same-repo PRs
-# have `fork == false`.
+# Every non-fork context in the upstream repository still resolves to `ghcr`:
+# on pushes, tags and `workflow_dispatch` there is no `pull_request` payload, so
+# the fork test is null, `null == true` is false, and the `||` returns `'ghcr'`.
+# Same-repo PRs have `fork == false`.
+#
+# Calibre-Web NextGen+ builds from its own repository, which has no access to
+# the upstream owner's private mirror at all, so any repository other than
+# upstream takes the credential-free path too.
 FORK_AWARE_PBS_SOURCE = (
-    "PBS_SOURCE=${{ github.event.pull_request.head.repo.fork == true "
+    "PBS_SOURCE=${{ (github.repository != 'new-usemame/Calibre-Web-NextGen' "
+    "|| github.event.pull_request.head.repo.fork == true) "
     "&& 'upstream' || 'ghcr' }}"
 )
 
@@ -621,13 +626,17 @@ def test_non_pull_request_image_builds_keep_the_bare_mirror_pin() -> None:
     exists on `pull_request`. Spreading it to the dev/release builds would let
     a published image quietly come from the flaky CDN if the expression ever
     evaluated wrong.
+
+    The one exception is the approved selector itself: outside a pull request
+    it reduces to "is this upstream's repository", which Calibre-Web NextGen+
+    needs because upstream's private mirror is unreachable from its builds.
     """
     offenders = [
         f"{workflow}:{job}: {selectors}"
         for workflow, job, step in _image_build_steps()
         if not (PR_REACHABLE_TRIGGERS & _workflow_triggers(workflow))
         for selectors in [_pbs_source_selector(step)]
-        if selectors != ["PBS_SOURCE=ghcr"]
+        if selectors not in (["PBS_SOURCE=ghcr"], [FORK_AWARE_PBS_SOURCE])
     ]
     assert not offenders, (
         f"These builds never run on a fork PR and must pin PBS_SOURCE=ghcr "

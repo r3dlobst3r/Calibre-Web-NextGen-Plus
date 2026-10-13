@@ -44,6 +44,9 @@ permissions:
 
 jobs:
   check-commit-committer:
+    # Upstream's maintainer automation (its accounts, secrets and channels); a fork such as
+    # Calibre-Web NextGen+ skips it.
+    if: github.repository == 'new-usemame/Calibre-Web-NextGen'
     name: validate-author
     runs-on: ubuntu-latest
     steps:

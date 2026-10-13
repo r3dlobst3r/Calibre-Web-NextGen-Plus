@@ -44,6 +44,8 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
       - name: Ensure python-build-standalone mirror exists
+        # The mirror lives in upstream's registry; a fork builds from the release CDN.
+        if: github.repository == 'new-usemame/Calibre-Web-NextGen'
         env:
           GHCR_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: bash scripts/ensure-python-mirror.sh
@@ -128,17 +130,19 @@ jobs:
           # PBS_SOURCE=ghcr pulls Python/kepubify from our GHCR mirror rather
           # than the release CDN, which intermittently 404s the Actions egress.
           # Contributors build without it and fall back to the CDN (see Dockerfile).
+          # The mirror is private to upstream, so a release built in another
+          # repository (Calibre-Web NextGen+) takes the same CDN fallback.
           build-args: |
             BUILD_DATE=${{ github.event.release.created_at || github.event.repository.updated_at }}
             VERSION=${{ steps.ver.outputs.tag }}
-            PBS_SOURCE=ghcr
+            PBS_SOURCE=${{ (github.repository != 'new-usemame/Calibre-Web-NextGen' || github.event.pull_request.head.repo.fork == true) && 'upstream' || 'ghcr' }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.ver.outputs.tag }}
             org.opencontainers.image.licenses=GPL-3.0-or-later
-            org.opencontainers.image.title=Calibre-Web-NextGen
-            org.opencontainers.image.description=Community continuation of Calibre-Web-Automated
+            org.opencontainers.image.title=Calibre-Web-NextGen-Plus
+            org.opencontainers.image.description=Calibre-Web NextGen with built-in book downloads
 
       - name: Export digest
         if: ${{ inputs.dry_run != true }}

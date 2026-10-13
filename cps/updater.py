@@ -31,7 +31,7 @@ log = logger.create()
 # until #125 — leaving the admin updater advertising obsolete versions. The
 # env override matches the contract from #28 so downstreams can still pin to
 # upstream or another fork by name.
-_REPOSITORY_SLUG = os.environ.get("CWA_RELEASE_REPO", "new-usemame/Calibre-Web-NextGen").strip() or "new-usemame/Calibre-Web-NextGen"
+_REPOSITORY_SLUG = os.environ.get("CWA_RELEASE_REPO", "r3dlobst3r/Calibre-Web-NextGen-Plus").strip() or "r3dlobst3r/Calibre-Web-NextGen-Plus"
 _REPOSITORY_API_URL = 'https://api.github.com/repos/' + _REPOSITORY_SLUG
 
 

@@ -69,7 +69,7 @@ log = logger.create()
 #: Repository queried for the latest release. ``CWA_RELEASE_REPO`` keeps the
 #: override the cwa-init shell probe used to offer, so downstream forks can
 #: point the indicator at their own releases.
-DEFAULT_RELEASE_REPO = "new-usemame/Calibre-Web-NextGen"
+DEFAULT_RELEASE_REPO = "r3dlobst3r/Calibre-Web-NextGen-Plus"
 
 SUCCESS_TTL_SECONDS = 6 * 60 * 60
 FAILURE_TTL_SECONDS = 15 * 60

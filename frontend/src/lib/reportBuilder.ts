@@ -74,7 +74,7 @@ export interface ReportContext {
 /** Where reports go. Bugs and features to the tracker; open questions to chat,
  *  where a conversation is the right shape and an issue would be noise. */
 const CHANNELS = {
-  issuesNew: 'https://github.com/new-usemame/Calibre-Web-NextGen/issues/new',
+  issuesNew: 'https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/issues/new',
   discord: 'https://discord.gg/B8NXZmcp32',
 } as const;
 

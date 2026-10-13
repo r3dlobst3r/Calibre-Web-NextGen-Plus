@@ -379,7 +379,7 @@ jobs:
           # `pull_request` payload or `fork == false`, so it still resolves to
           # `ghcr`. Pinned byte-for-byte by tests/unit/test_dockerfile_contributor_build.py.
           build-args: |
-            PBS_SOURCE=${{ github.event.pull_request.head.repo.fork == true && 'upstream' || 'ghcr' }}
+            PBS_SOURCE=${{ (github.repository != 'new-usemame/Calibre-Web-NextGen' || github.event.pull_request.head.repo.fork == true) && 'upstream' || 'ghcr' }}
 
       - name: Set test UID/GID
         run: |
@@ -614,7 +614,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            PBS_SOURCE=${{ github.event.pull_request.head.repo.fork == true && 'upstream' || 'ghcr' }}
+            PBS_SOURCE=${{ (github.repository != 'new-usemame/Calibre-Web-NextGen' || github.event.pull_request.head.repo.fork == true) && 'upstream' || 'ghcr' }}
 
       - name: Resolve image to test
         id: img

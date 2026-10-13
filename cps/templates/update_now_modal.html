@@ -41,7 +41,7 @@
         <div class="update-setup-pane" data-update-pane="run" style="margin-top: 14px; display:none;">
           <p>{{ _('Pull the new image, then recreate your container with the same options you started it with:') }}</p>
           <div class="update-cmd">
-            <pre><code>docker pull ghcr.io/new-usemame/calibre-web-nextgen:latest</code></pre>
+            <pre><code>docker pull ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest</code></pre>
             <button type="button" class="btn btn-primary btn-sm update-copy-btn" data-copied-label="{{ _('Copied!') }}">{{ _('Copy') }}</button>
           </div>
           <p class="text-muted">{{ _('Then stop and remove the old container and start a new one with your usual docker run command. Your mounted volumes keep all data.') }}</p>
@@ -59,7 +59,7 @@
           <p><strong>{{ _('Portainer:') }}</strong> {{ _('Images → pull the image below, then Containers → select Calibre-Web NextGen → Recreate with "Re-pull image" enabled.') }}</p>
           <p><strong>{{ _('Synology Container Manager:') }}</strong> {{ _('Registry → download the image below (tag: latest), then stop the container → Action → Reset to recreate it.') }}</p>
           <div class="update-cmd">
-            <pre><code>ghcr.io/new-usemame/calibre-web-nextgen:latest</code></pre>
+            <pre><code>ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest</code></pre>
             <button type="button" class="btn btn-primary btn-sm update-copy-btn" data-copied-label="{{ _('Copied!') }}">{{ _('Copy') }}</button>
           </div>
         </div>

@@ -26,9 +26,9 @@ const HELP_LINKS = {
   // /issues/new/choose lands on the template picker (Bug report / Feature
   // request) instead of a blank issue — the chooser lists the forms in
   // .github/ISSUE_TEMPLATE/ (#799, adopts @chloeroform's #800).
-  issue: 'https://github.com/new-usemame/Calibre-Web-NextGen/issues/new/choose',
+  issue: 'https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/issues/new/choose',
   discord: 'https://discord.gg/B8NXZmcp32',
-  docs: 'https://github.com/new-usemame/Calibre-Web-NextGen#readme',
+  docs: 'https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus#readme',
 };
 
 /** Shared open/close behaviour for the top-bar menus: opens on hover (desktop)

@@ -23,14 +23,14 @@ import pytest
 
 @pytest.mark.unit
 class TestRepositoryTarget:
-    def test_default_repo_is_new_usemame_fork(self, monkeypatch):
+    def test_default_repo_is_nextgen_plus(self, monkeypatch):
         monkeypatch.delenv("CWA_RELEASE_REPO", raising=False)
         # Reimport so the module re-reads the env at import time.
         from cps import updater
         importlib.reload(updater)
-        assert updater._REPOSITORY_SLUG == "new-usemame/Calibre-Web-NextGen"
+        assert updater._REPOSITORY_SLUG == "r3dlobst3r/Calibre-Web-NextGen-Plus"
         assert updater._REPOSITORY_API_URL == (
-            "https://api.github.com/repos/new-usemame/Calibre-Web-NextGen"
+            "https://api.github.com/repos/r3dlobst3r/Calibre-Web-NextGen-Plus"
         )
 
     def test_env_override_honored(self, monkeypatch):
@@ -46,7 +46,7 @@ class TestRepositoryTarget:
         monkeypatch.setenv("CWA_RELEASE_REPO", "   ")
         from cps import updater
         importlib.reload(updater)
-        assert updater._REPOSITORY_SLUG == "new-usemame/Calibre-Web-NextGen"
+        assert updater._REPOSITORY_SLUG == "r3dlobst3r/Calibre-Web-NextGen-Plus"
 
 
 @pytest.mark.unit

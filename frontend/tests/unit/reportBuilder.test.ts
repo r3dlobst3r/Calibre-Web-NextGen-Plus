@@ -270,7 +270,7 @@ describe('githubIssueUrl', () => {
   });
 
   test('points at our own tracker', () => {
-    assert.ok(githubIssueUrl('T', 'B').startsWith('https://github.com/new-usemame/Calibre-Web-NextGen/issues/new'));
+    assert.ok(githubIssueUrl('T', 'B').startsWith('https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/issues/new'));
   });
 
   test('truncates rather than producing a URL GitHub will reject', () => {

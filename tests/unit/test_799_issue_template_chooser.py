@@ -20,8 +20,8 @@ TOPBAR_TSX = REPO_ROOT / "frontend" / "src" / "components" / "TopBar.tsx"
 # The bare blank-issue URL (closing quote immediately after `/issues/new`) is
 # the pre-fix target; the chooser URL is `/issues/new/choose`, so this exact
 # literal must not appear once the fix is in.
-_BLANK_ISSUE_URL = "'https://github.com/new-usemame/Calibre-Web-NextGen/issues/new'"
-_CHOOSER_URL = "https://github.com/new-usemame/Calibre-Web-NextGen/issues/new/choose"
+_BLANK_ISSUE_URL = "'https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/issues/new'"
+_CHOOSER_URL = "https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/issues/new/choose"
 
 
 def test_help_menu_issue_link_uses_template_chooser():

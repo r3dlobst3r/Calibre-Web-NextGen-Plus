@@ -17,6 +17,9 @@ permissions:
 
 jobs:
   dockerHubDescription:
+    # Upstream's maintainer automation (its accounts, secrets and channels); a fork such as
+    # Calibre-Web NextGen+ skips it.
+    if: github.repository == 'new-usemame/Calibre-Web-NextGen'
     runs-on: ubuntu-latest
     steps:
     - name: Probe DockerHub creds

@@ -58,7 +58,9 @@ jobs:
     # anyway (you can't enable auto-merge from outside the head repo),
     # and we want one clear refusal line in the log rather than letting
     # the later steps fail in confusing ways.
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # Upstream's maintainer automation (its accounts, secrets and channels); a fork such as
+    # Calibre-Web NextGen+ skips it.
+    if: github.repository == 'new-usemame/Calibre-Web-NextGen' && (github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main (for tier-policy.config + scripts/lib)

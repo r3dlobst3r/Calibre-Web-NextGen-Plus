@@ -162,6 +162,8 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha || github.ref }}
       - name: Ensure python-build-standalone mirror exists
+        # The mirror lives in upstream's registry; a fork builds from the release CDN.
+        if: github.repository == 'new-usemame/Calibre-Web-NextGen'
         env:
           GHCR_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: bash scripts/ensure-python-mirror.sh
@@ -296,7 +298,7 @@ jobs:
           build-args: |
             BUILD_DATE=${{ github.event.repository.updated_at }}
             VERSION=DEV_BUILD-${{ env.IMAGE_TAG }}-${{ vars.CURRENT_DEV_BUILD_NUM }}
-            PBS_SOURCE=${{ github.event.pull_request.head.repo.fork == true && 'upstream' || 'ghcr' }}
+            PBS_SOURCE=${{ (github.repository != 'new-usemame/Calibre-Web-NextGen' || github.event.pull_request.head.repo.fork == true) && 'upstream' || 'ghcr' }}
 
       # --- 4. Export Digest for Merge Job ---
       - name: Export digest
@@ -450,7 +452,7 @@ jobs:
           build-args: |
             BUILD_DATE=${{ github.event.repository.updated_at }}
             VERSION=DEV_BUILD-${{ env.IMAGE_TAG }}-${{ vars.CURRENT_DEV_BUILD_NUM }}
-            PBS_SOURCE=${{ github.event.pull_request.head.repo.fork == true && 'upstream' || 'ghcr' }}
+            PBS_SOURCE=${{ (github.repository != 'new-usemame/Calibre-Web-NextGen' || github.event.pull_request.head.repo.fork == true) && 'upstream' || 'ghcr' }}
 
       # --- 4. Rotate Cache (Prevent Infinite Growth) ---
       - name: Move cache

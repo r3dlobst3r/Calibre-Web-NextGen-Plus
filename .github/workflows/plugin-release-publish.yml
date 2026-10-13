@@ -50,7 +50,9 @@ jobs:
     timeout-minutes: 10
     # Prereleases are not a delivery channel for devices, and the script only
     # accepts vX.Y.Z tags anyway.
-    if: github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false
+    # Upstream's maintainer automation (its accounts, secrets and channels); a fork such as
+    # Calibre-Web NextGen+ skips it.
+    if: github.repository == 'new-usemame/Calibre-Web-NextGen' && (github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false)
     steps:
       # Constrain the tag to vX.Y.Z before it is ever used as a git ref. Only an
       # account that can publish a release can reach this workflow, but a ref

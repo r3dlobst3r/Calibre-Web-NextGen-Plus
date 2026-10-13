@@ -37,9 +37,13 @@ jobs:
   guard:
     # Only run for the two tier labels. Other labels (needs-review,
     # backport-from-upstream, etc.) are unrestricted.
+    # Upstream's maintainer automation (its accounts, secrets and channels); a fork such as
+    # Calibre-Web NextGen+ skips it.
     if: |
-      github.event.label.name == 'safe-tier-1' ||
-      github.event.label.name == 'safe-tier-2'
+      github.repository == 'new-usemame/Calibre-Web-NextGen' && (
+        github.event.label.name == 'safe-tier-1' ||
+        github.event.label.name == 'safe-tier-2'
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main (for tier-policy.config)

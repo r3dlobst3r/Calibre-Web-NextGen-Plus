@@ -89,7 +89,7 @@ def test_changelog_link_is_fork():
     path = os.path.join(TEMPLATES_DIR, "layout.html")
     with open(path, encoding="utf-8") as fh:
         body = fh.read()
-    assert "new-usemame/Calibre-Web-NextGen/releases" in body, (
+    assert "r3dlobst3r/Calibre-Web-NextGen-Plus/releases" in body, (
         "layout.html cwa_update banner must link to the fork's releases page"
     )
 
@@ -101,7 +101,7 @@ def test_create_issue_link_is_fork():
     path = os.path.join(TEMPLATES_DIR, "http_error.html")
     with open(path, encoding="utf-8") as fh:
         body = fh.read()
-    assert "new-usemame/Calibre-Web-NextGen/issues" in body, (
+    assert "r3dlobst3r/Calibre-Web-NextGen-Plus/issues" in body, (
         "http_error.html 'Create Issue' link must point at the fork tracker"
     )
 
@@ -115,6 +115,6 @@ def test_admin_github_button_is_fork():
     with open(path, encoding="utf-8") as fh:
         body = fh.read()
     assert 'id="cwa_github_link"' in body
-    assert "new-usemame/Calibre-Web-NextGen" in body, (
+    assert "r3dlobst3r/Calibre-Web-NextGen-Plus" in body, (
         "admin.html cwa_github_link must point at the fork repo"
     )

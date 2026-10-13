@@ -28,7 +28,7 @@ from flask import request
 
 from . import constants
 
-ISSUES_NEW = "https://github.com/new-usemame/Calibre-Web-NextGen/issues/new"
+ISSUES_NEW = "https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/issues/new"
 
 # GitHub rejects an over-long URL, and the failure is bad: the user clicks
 # "report", lands on an error page, and the report is gone. Stay well under it.
