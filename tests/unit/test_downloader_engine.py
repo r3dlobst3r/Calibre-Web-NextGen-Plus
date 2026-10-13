@@ -47,6 +47,28 @@ def test_only_the_offered_sources_are_registered(engine):
     assert names == {'direct_download', 'libgen', 'audiobookbay'}
 
 
+def test_a_source_switched_on_without_an_address_is_reported(engine, monkeypatch):
+    """The engine ships no site addresses: switched on alone, a source stays unusable."""
+    config = engine.engine('core.config').config
+    values = {'DIRECT_DOWNLOAD_ENABLED': True, 'LIBGEN_SEARCH_ENABLED': True, 'ABB_ENABLED': True,
+              'ABB_HOSTNAME': '', 'AA_MIRROR_URLS': [], 'LIBGEN_MIRROR_URLS': [], 'AA_BASE_URL': 'auto'}
+    real_get = config.get
+    monkeypatch.setattr(config, 'get', lambda key, default=None: values[key] if key in values else real_get(key, default))
+    local = engine.LocalEngine()
+    assert local.sources('ebook') == [] and local.sources('audiobook') == []
+    assert local.source_problems() == [{'source': 'direct_download', 'reason': 'needs_mirror'},
+                                       {'source': 'libgen', 'reason': 'needs_mirror'},
+                                       {'source': 'audiobookbay', 'reason': 'needs_hostname'}]
+
+
+def test_nothing_is_reported_for_sources_left_off(engine, monkeypatch):
+    config = engine.engine('core.config').config
+    values = {'DIRECT_DOWNLOAD_ENABLED': False, 'LIBGEN_SEARCH_ENABLED': False, 'ABB_ENABLED': False}
+    real_get = config.get
+    monkeypatch.setattr(config, 'get', lambda key, default=None: values[key] if key in values else real_get(key, default))
+    assert engine.LocalEngine().source_problems() == []
+
+
 def test_every_offered_setting_still_exists(engine):
     """Guards a future sync: a renamed upstream key would silently vanish from the page."""
     document = engine.engine('core.settings_registry').serialize_all_settings(include_values=True)

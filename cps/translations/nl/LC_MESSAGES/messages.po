@@ -20722,3 +20722,35 @@ msgstr "Bezig…"
 #: cps/spa_strings.py
 msgid "{series} #{position}"
 msgstr "{series} #{position}"
+
+#: cps/spa_strings.py
+msgid "AudiobookBay is switched on but has no hostname. Set one under AudiobookBay below."
+msgstr "AudiobookBay staat aan maar heeft geen hostnaam. Stel er een in onder AudiobookBay hieronder."
+
+#: cps/spa_strings.py
+msgid "Anna's Archive is switched on but no download provider is. Turn one on under Download Sources below."
+msgstr "Anna's Archive staat aan maar geen enkele downloadaanbieder. Zet er een aan onder Downloadbronnen hieronder."
+
+#: cps/spa_strings.py
+msgid "LibGen is switched on but has no address. Add a LibGen mirror URL under Mirrors below."
+msgstr "LibGen staat aan maar heeft geen adres. Voeg een LibGen-mirror-URL toe onder Mirrors hieronder."
+
+#: cps/spa_strings.py
+msgid "Anna's Archive is switched on but has no address. Add an Anna's Archive mirror URL under Mirrors below."
+msgstr "Anna's Archive staat aan maar heeft geen adres. Voeg een Anna's Archive-mirror-URL toe onder Mirrors hieronder."
+
+#: cps/spa_strings.py
+msgid "No ebook source can be searched yet."
+msgstr "Er kan nog in geen enkele e-bookbron worden gezocht."
+
+#: cps/spa_strings.py
+msgid "No download source can be searched yet, so these books cannot be downloaded. Check the sources in Downloads."
+msgstr "Er kan nog in geen enkele downloadbron worden gezocht, dus deze boeken kunnen niet worden gedownload. Controleer de bronnen bij Downloads."
+
+#: cps/spa_strings.py
+msgid "Downloads are not fully set up yet, so these books cannot be downloaded. Ask an administrator."
+msgstr "Downloads zijn nog niet volledig ingesteld, dus deze boeken kunnen niet worden gedownload. Vraag het een beheerder."
+
+#: cps/spa_strings.py
+msgid "Open Downloads"
+msgstr "Downloads openen"

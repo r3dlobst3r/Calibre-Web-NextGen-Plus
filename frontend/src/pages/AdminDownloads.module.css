@@ -40,3 +40,7 @@
   .settings { grid-template-columns: 1fr; }
   .tabs { flex-direction: row; flex-wrap: wrap; }
 }
+
+.problems { display: flex; flex-direction: column; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; }
+.problems > li { display: flex; align-items: flex-start; gap: var(--sp-2); }
+.problems > li > svg { flex: none; margin-top: 3px; }

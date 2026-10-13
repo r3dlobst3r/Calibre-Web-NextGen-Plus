@@ -124,6 +124,28 @@ class LocalEngine:
         return [source['name'] for source in engine('release_sources').list_available_sources()
                 if source.get('enabled') and content_type in (source.get('supported_content_types') or ())]
 
+    def source_problems(self):
+        """Sources an administrator switched on that still cannot be searched.
+
+        The engine ships no site addresses, so a source switched on without a
+        mirror is silently unavailable. Each entry names the source and a reason
+        code the admin page turns into the fix.
+        """
+        config = engine('core.config').config
+        mirrors = engine('core.mirrors')
+        available = {source['name'] for source in engine('release_sources').list_available_sources()
+                     if source.get('enabled')}
+        problems = []
+        if config.get('DIRECT_DOWNLOAD_ENABLED', False) and 'direct_download' not in available:
+            problems.append({'source': 'direct_download',
+                             'reason': 'needs_mirror' if not mirrors.has_aa_mirror_configuration()
+                             else 'needs_provider'})
+        if config.get('LIBGEN_SEARCH_ENABLED', False) is True and 'libgen' not in available:
+            problems.append({'source': 'libgen', 'reason': 'needs_mirror'})
+        if config.get('ABB_ENABLED', False) is True and 'audiobookbay' not in available:
+            problems.append({'source': 'audiobookbay', 'reason': 'needs_hostname'})
+        return problems
+
     def releases(self, book, *, content_type='ebook'):
         """Search every enabled source for one book, sharing one time budget.
 

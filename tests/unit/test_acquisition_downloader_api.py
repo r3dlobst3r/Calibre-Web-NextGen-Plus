@@ -202,6 +202,13 @@ def test_status_reports_the_connection_and_enabled_sources(admin):
     body = admin.client.get('/api/v1/admin/downloads').get_json()
     assert body['enabled'] is True and body['connection']['config'] == CONFIG
     assert body['sources'] == {'ebook': ['direct_download', 'libgen'], 'audiobook': ['audiobookbay']}
+    assert body['source_problems'] == []
+
+
+def test_status_names_a_switched_on_source_that_cannot_be_searched(admin):
+    admin.fake.problems = [{'source': 'direct_download', 'reason': 'needs_mirror'}]
+    body = admin.client.get('/api/v1/admin/downloads').get_json()
+    assert body['source_problems'] == [{'source': 'direct_download', 'reason': 'needs_mirror'}]
 
 
 def test_switching_off_and_on_keeps_one_connection(admin):

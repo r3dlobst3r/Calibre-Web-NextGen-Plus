@@ -151,6 +151,19 @@ export function GetMoreBooks({ query }: { query: string }) {
         <EmptyState message={t('No books found for "{q}".', { q: query })} />
       ) : (
         <>
+          {!books.some((book) => book.navigation.some((nav) => nav.relations[0]?.startsWith('downloader:'))) && (
+            <div className={styles.notice} role="status" data-testid="get-more-no-sources">
+              <AlertTriangle size={16} aria-hidden="true" focusable={false} />
+              <p>
+                {me?.role?.admin
+                  ? t('No download source can be searched yet, so these books cannot be downloaded. Check the sources in Downloads.')
+                  : t('Downloads are not fully set up yet, so these books cannot be downloaded. Ask an administrator.')}
+                {me?.role?.admin && (
+                  <>{' '}<Link href="/admin/downloads" className={styles.link}>{t('Open Downloads')}</Link></>
+                )}
+              </p>
+            </div>
+          )}
           <ul className={styles.books} role="list">
             {books.map((book) => (
               <BookResult key={book.identity} book={book} connectionId={connectionId as string}

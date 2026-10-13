@@ -9,6 +9,7 @@ import {
   updateDownloader,
   type DownloaderStatus,
   type MetadataProvider,
+  type SourceProblem,
 } from '../lib/downloads';
 import { useRuntimeReasonText } from '../lib/acquisitionCopy';
 import { ApiError } from '../lib/api';
@@ -38,6 +39,17 @@ export function AdminDownloads() {
   const announce = useAnnouncer();
   const queryClient = useQueryClient();
   const reasonText = useRuntimeReasonText();
+  const problemText = (problem: SourceProblem): string => {
+    if (problem.reason === 'needs_hostname') {
+      return t('AudiobookBay is switched on but has no hostname. Set one under AudiobookBay below.');
+    }
+    if (problem.reason === 'needs_provider') {
+      return t("Anna's Archive is switched on but no download provider is. Turn one on under Download Sources below.");
+    }
+    return problem.source === 'libgen'
+      ? t('LibGen is switched on but has no address. Add a LibGen mirror URL under Mirrors below.')
+      : t("Anna's Archive is switched on but has no address. Add an Anna's Archive mirror URL under Mirrors below.");
+  };
   const formId = useId();
   const [actionError, setActionError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string | null>(null);
@@ -157,10 +169,22 @@ export function AdminDownloads() {
                 }} />
               <span>{t('Allow direct DRM-free MOBI 6 books')}</span>
             </label>
+            {(data.source_problems ?? []).length > 0 && (
+              <ul className={own.problems} role="list" data-testid="downloads-source-problems">
+                {data.source_problems.map((problem) => (
+                  <li key={problem.source} className={styles.bad}>
+                    <AlertTriangle size={14} aria-hidden="true" focusable={false} />
+                    <span>{problemText(problem)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
             <p className={styles.hint}>
               {data.sources.ebook.length
                 ? t('Ebooks come from: {sources}.', { sources: sourceList(data.sources.ebook) })
-                : t('No ebook source is switched on yet. Turn one on under Download Sources below.')}
+                : (data.source_problems ?? []).some((problem) => problem.source !== 'audiobookbay')
+                  ? t('No ebook source can be searched yet.')
+                  : t('No ebook source is switched on yet. Turn one on under Download Sources below.')}
               {' '}
               {data.sources.audiobook.length
                 ? t('Audiobooks come from: {sources}.', { sources: sourceList(data.sources.audiobook) })

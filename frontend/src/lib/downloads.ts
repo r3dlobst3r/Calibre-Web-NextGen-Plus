@@ -18,7 +18,14 @@ export interface DownloaderStatus {
   } | null;
   /** Enabled sources by kind; an empty list means nothing can be found yet. */
   sources: { ebook: string[]; audiobook: string[] };
+  /** Sources switched on that still cannot be searched, and why. */
+  source_problems: SourceProblem[];
   acquisition: AcquisitionInstanceState;
+}
+
+export interface SourceProblem {
+  source: 'direct_download' | 'libgen' | 'audiobookbay';
+  reason: 'needs_mirror' | 'needs_provider' | 'needs_hostname';
 }
 
 export interface DownloaderTask {

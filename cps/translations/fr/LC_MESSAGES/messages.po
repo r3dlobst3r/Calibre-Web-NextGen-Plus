@@ -21338,3 +21338,35 @@ msgstr "En cours…"
 #: cps/spa_strings.py
 msgid "{series} #{position}"
 msgstr "{series} nº {position}"
+
+#: cps/spa_strings.py
+msgid "AudiobookBay is switched on but has no hostname. Set one under AudiobookBay below."
+msgstr "AudiobookBay est activé mais n’a pas de nom d’hôte. Indiquez-en un dans AudiobookBay ci-dessous."
+
+#: cps/spa_strings.py
+msgid "Anna's Archive is switched on but no download provider is. Turn one on under Download Sources below."
+msgstr "Anna’s Archive est activé mais aucun fournisseur de téléchargement ne l’est. Activez-en un dans Sources de téléchargement ci-dessous."
+
+#: cps/spa_strings.py
+msgid "LibGen is switched on but has no address. Add a LibGen mirror URL under Mirrors below."
+msgstr "LibGen est activé mais n’a pas d’adresse. Ajoutez une URL de miroir LibGen dans Miroirs ci-dessous."
+
+#: cps/spa_strings.py
+msgid "Anna's Archive is switched on but has no address. Add an Anna's Archive mirror URL under Mirrors below."
+msgstr "Anna’s Archive est activé mais n’a pas d’adresse. Ajoutez une URL de miroir Anna’s Archive dans Miroirs ci-dessous."
+
+#: cps/spa_strings.py
+msgid "No ebook source can be searched yet."
+msgstr "Aucune source de livres numériques ne peut encore être interrogée."
+
+#: cps/spa_strings.py
+msgid "No download source can be searched yet, so these books cannot be downloaded. Check the sources in Downloads."
+msgstr "Aucune source de téléchargement ne peut encore être interrogée : ces livres ne peuvent donc pas être téléchargés. Vérifiez les sources dans Téléchargements."
+
+#: cps/spa_strings.py
+msgid "Downloads are not fully set up yet, so these books cannot be downloaded. Ask an administrator."
+msgstr "Les téléchargements ne sont pas encore entièrement configurés : ces livres ne peuvent donc pas être téléchargés. Demandez à un administrateur."
+
+#: cps/spa_strings.py
+msgid "Open Downloads"
+msgstr "Ouvrir Téléchargements"

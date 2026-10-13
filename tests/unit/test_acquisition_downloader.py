@@ -63,6 +63,7 @@ class FakeEngine:
                           release('abb2', 'mp3', source='audiobookbay'), release('abb3', None, source='audiobookbay')],
         }
         self.enabled = {'ebook': ['direct_download', 'libgen'], 'audiobook': ['audiobookbay']}
+        self.problems = []
         self.tasks, self.files, self.calls = {}, {}, []
 
     def factory(self, config):
@@ -75,6 +76,9 @@ class FakeClient:
 
     def sources(self, content_type='ebook'):
         return list(self.fake.enabled.get(content_type, []))
+
+    def source_problems(self):
+        return list(self.fake.problems)
 
     def releases(self, book, *, content_type='ebook'):
         self.fake.calls.append(('releases', book.get('title'), content_type))

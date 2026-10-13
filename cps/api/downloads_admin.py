@@ -46,11 +46,13 @@ def _status():
     def sources():
         from ..services.acquisition.downloader import local_engine
         engine = local_engine({})
-        return {kind: engine.sources(kind) for kind in CONTENT_TYPES}
+        return {kind: engine.sources(kind) for kind in CONTENT_TYPES}, engine.source_problems()
+    available, problems = _run_private_blocking(sources)
     return {
         'connection': dict(found[0], config=found[1]) if found else None,
         'enabled': bool(found and found[0]['enabled']),
-        'sources': _run_private_blocking(sources),
+        'sources': available,
+        'source_problems': problems,
         'acquisition': dict(admission.instance_state(ub.app_DB_path), runtime=worker_available()),
     }
 
