@@ -126,6 +126,15 @@ EDITS = [
     logging.setLoggerClass(CustomLogger)
 
 """, ""),
+    # CWNG runs from /config, the user's volume. The bypass helper (and the
+    # downloaded_files/ folders SeleniumBase makes in its working directory) runs
+    # in the engine's private temp folder instead.
+    ('bypass/internal_bypasser.py', """            stdin=subprocess.PIPE,
+            text=True,
+            env=env_vars,""", """            stdin=subprocess.PIPE,
+            text=True,
+            env=env_vars,
+            cwd=str(env.TMP_DIR),"""),
     # Shelfmark keeps its data folder beside the package; the copy keeps it inside.
     ('core/languages.py',
      'LANGUAGE_DATA_PATH = Path(__file__).resolve().parents[1].parent / "data" / "book-languages.json"',

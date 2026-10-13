@@ -1128,6 +1128,7 @@ class _BypassHelper:
             stdin=subprocess.PIPE,
             text=True,
             env=env_vars,
+            cwd=str(env.TMP_DIR),
             # Give the helper its own session: Chrome, Xvfb and ffmpeg inherit its process
             # group, which is what lets the cleanup sweep tell this helper's browsers apart
             # from a concurrent worker's (#1231) and lets us kill the whole tree below.

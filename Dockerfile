@@ -349,6 +349,28 @@ RUN \
   /var/tmp/* \
   /root/.cache
 
+# STEP 5.5 - The downloader's Cloudflare bypass: Chromium, a virtual display and
+# SeleniumBase. Kept before the application COPY so this large layer stays cached.
+# Ubuntu's own chromium package is a snap shim that cannot run in a container, so
+# Playwright's Chromium build supplies the browser (amd64 and arm64) together with
+# its system libraries; Playwright itself is removed again once it has done that.
+# SeleniumBase finds the browser as `chromium` on PATH.
+ARG PLAYWRIGHT_VERSION=1.63.0
+COPY requirements-bypass.txt /tmp/requirements-bypass.txt
+RUN \
+  apt-get update && \
+  apt-get install -y --no-install-recommends xvfb xauth && \
+  /lsiopy/bin/pip install --no-cache-dir --no-deps -r /tmp/requirements-bypass.txt && \
+  /lsiopy/bin/pip install --no-cache-dir "playwright==${PLAYWRIGHT_VERSION}" && \
+  PLAYWRIGHT_BROWSERS_PATH=/opt/chromium /lsiopy/bin/python -m playwright install --with-deps --no-shell chromium && \
+  CHROME="$(find /opt/chromium -type f -name chrome -path '*chrome-linux*' | head -n 1)" && \
+  test -x "$CHROME" && ln -sf "$CHROME" /usr/local/bin/chromium && chromium --version && \
+  /lsiopy/bin/pip uninstall -y playwright && \
+  /lsiopy/bin/python -c "import Xlib.X, seleniumbase.undetected.cdp_driver; assert hasattr(Xlib.X, 'FamilyServerInterpreted')" && \
+  chmod -R a+rX /opt/chromium && \
+  apt-get -y autoremove && \
+  rm -rf /var/lib/apt/lists/* /var/tmp/* /root/.cache /tmp/requirements-bypass.txt
+
 # STEP 6 - Copy application files
 # Copy the rest of the application code (changes most frequently)
 COPY --chown=abc:abc . /app/calibre-web-automated/

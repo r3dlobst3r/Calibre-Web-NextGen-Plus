@@ -54,6 +54,8 @@ def configure():
             'AA_CONTENT_TYPE_ROUTING': 'false',
             'USE_CONTENT_TYPE_DIRECTORIES': 'false',
             'ONBOARDING': 'false',
+            # Run the Cloudflare bypass in its own helper process, away from CWNG's.
+            'DOCKERMODE': 'true',
         }
         for key, value in fixed.items():
             os.environ[key] = value

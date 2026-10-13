@@ -1,0 +1,28 @@
+# The downloader's built-in Cloudflare bypass: SeleniumBase driving Chromium.
+#
+# Installed by the Dockerfile with `pip install --no-deps`. SeleniumBase's package
+# metadata pins exact versions of requests, rich and beautifulsoup4 that CWNG's
+# own pins (pyproject.toml) cannot share; its Chrome DevTools driver, which is the
+# only part the bypass uses, runs with CWNG's versions. These are exactly the
+# modules that driver and its virtual display import, verified in the image.
+#
+# Do not add python3-xlib (pulled in by MouseInfo's metadata): it overwrites the
+# Xlib namespace with a 2014 build that lacks what the driver needs.
+seleniumbase==4.54.12
+mycdp==1.4.0
+websockets==17.2
+cssselect==1.6.0
+colorama==0.4.6
+fasteners==0.20
+filelock==4.1.1
+sbvirtualdisplay==1.4.0
+PyVirtualDisplay==3.0
+python-xlib==0.33
+PyAutoGUI==0.9.54
+PyMsgBox==2.0.1
+pytweening==1.2.0
+PyScreeze==1.0.1
+PyGetWindow==0.0.9
+PyRect==0.2.0
+MouseInfo==0.1.3
+pyperclip==1.11.0
