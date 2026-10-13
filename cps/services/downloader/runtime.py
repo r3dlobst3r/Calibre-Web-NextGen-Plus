@@ -47,7 +47,9 @@ def configure():
         os.environ.setdefault('CWNG_DOWNLOADS_CONFIG_DIR', str(root))
         fixed = {
             'BOOKS_OUTPUT_MODE': 'folder',
+            # The engine reads DESTINATION from its legacy variable name.
             'DESTINATION': str(completed / 'books'),
+            'INGEST_DIR': str(completed / 'books'),
             'DESTINATION_AUDIOBOOK': str(completed / 'audiobooks'),
             'AA_CONTENT_TYPE_ROUTING': 'false',
             'USE_CONTENT_TYPE_DIRECTORIES': 'false',
@@ -135,8 +137,11 @@ class LocalEngine:
         return True
 
     def task(self, task_id):
-        """(status, details) for one queued release, or None when the engine has no record."""
-        start()
+        """(status, details) for one queued release, or None when the engine has no record.
+
+        Reading needs no running workers: after a restart the queue is empty, and
+        the caller queues the release again, which starts them.
+        """
         queue = engine('core.queue').book_queue
         status = queue.get_task_status(task_id)
         task = queue.get_task(task_id)

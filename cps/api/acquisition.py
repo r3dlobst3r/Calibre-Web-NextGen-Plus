@@ -3,6 +3,7 @@
 from dataclasses import asdict
 from functools import wraps
 import os
+import re
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
@@ -20,6 +21,8 @@ from ..services.acquisition.opds import CatalogParseError
 from ..services.acquisition.newznab import IndexerError, IndexerService, connection_config as indexer_config
 from ..services.acquisition.sabnzbd import ClientError, SABClient, connection_config as client_config
 from ..services.acquisition.clients import CLIENTS, CLIENT_KINDS, connection_config as other_client_config
+from ..services.acquisition.contracts import IMPORTABLE_FORMATS
+from ..services.acquisition.downloader import DownloaderError, DownloaderService, connection_config as downloader_config
 from ..services.acquisition.storage import Conflict, ConnectionChanged, NotFound, StorageError
 
 
@@ -33,7 +36,12 @@ def _error(code, status):
         'private_network_not_allowed':'Only a home or local network range can be allowed. '
             'Loopback, link-local and cloud metadata addresses cannot.',
         'invalid_network_policy':'Check the network settings for this catalog',
-        'selections_full':'Too many active catalog selections. Wait for older selections to expire, then try again.'}
+        'selections_full':'Too many active catalog selections. Wait for older selections to expire, then try again.',
+        'downloads_disabled':'Downloads are not switched on. An administrator can turn them on under Downloads.',
+        'search_unavailable':'Book search is not available right now.',
+        'download_failed':'The download could not be started.',
+        'invalid_settings':'The download settings could not be read.',
+        'invalid_search':'Enter a shorter search.'}
     return jsonify({'error':{'code':code,'message':messages.get(code,'Acquisition request failed')}}),status
 
 
@@ -105,6 +113,8 @@ def _endpoint(*, admin=False, available=False, read=READ_RATE, write=WRITE_RATE)
                 return _error('connection_changed' if getattr(error, 'code', None) == 'connection_changed' else 'conflict',409)
             except admission.AdmissionError:
                 return _error('invalid_request',400)
+            except DownloaderError as error:
+                return _downloader_error(error)
             except (IndexerError, ClientError) as error:
                 return _error(error.code, 502)
             except (CatalogError, CatalogParseError, TransportError):
@@ -188,12 +198,13 @@ def worker_available():
 
 
 
-CONFIGURATORS = {'opds': connection_config, 'newznab': indexer_config, 'sabnzbd': client_config,
+CONFIGURATORS = {'opds': connection_config, 'newznab': indexer_config, 'sabnzbd': client_config, 'downloader': downloader_config,
     **{kind: (lambda value, kind=kind: other_client_config(kind, value)) for kind in ('nzbget', 'qbittorrent', 'transmission')}}
+CATALOG_KINDS = ('opds', 'newznab', 'downloader')
 
 
 def _require_connection(repo, connection_id, *, include_disabled=False, catalog=False):
-    kinds = ('opds', 'newznab') if catalog else tuple(CONFIGURATORS)
+    kinds = CATALOG_KINDS if catalog else tuple(CONFIGURATORS)
     rows = [row for row in repo.list_connections(include_disabled=include_disabled)
         if row.id == connection_id and row.adapter in kinds]
     if not rows:
@@ -246,6 +257,116 @@ def _job(repo,job):
                 visible.append(identifier)
         result['result']={'book_ids':visible,'disposition':receipt.disposition}
     return result
+
+
+def _downloader_error(error):
+    """The download engine's own reason when it gave one."""
+    status = {'invalid_search': 400, 'invalid_request': 400, 'invalid_connection': 400}.get(error.code, 502)
+    response, _ = _error(error.code, status)
+    detail = getattr(error, 'detail', None)
+    if detail:
+        body = response.get_json()
+        body['error']['message'] = detail
+        response = jsonify(body)
+    return response, status
+
+
+def _book_search(locale):
+    """Search books with one of CWNG's metadata providers (Open Library by default)."""
+    def search(query, provider_id):
+        from dataclasses import is_dataclass
+        from ..search_metadata import cl
+        provider = (next((c for c in cl if c.__id__ == provider_id), None)
+                    or next((c for c in cl if c.__id__ == 'openlibrary'), None))
+        if provider is None:
+            raise DownloaderError('search_unavailable')
+        records = provider.search(query, '', locale) or []
+        return [asdict(record) if is_dataclass(record) else record for record in records]
+    return search
+
+
+def _visible_book(identifier):
+    from .. import calibre_db
+    from .books import _can_browse_global
+    return bool(calibre_db.get_book_read_archived(identifier, getattr(config, 'config_read_column', 0),
+        allow_show_archived=True, allow_show_hidden=True,
+        allow_show_global=_can_browse_global(), allow_public_shelf_books=True))
+
+
+def _isbn_forms(value):
+    digits = ''.join(c for c in value if c.isdigit() or c in 'xX').upper()
+    forms = {digits}
+    if len(digits) == 10:
+        body = '978' + digits[:9]
+        check = (10 - sum(int(d) * (1 if i % 2 == 0 else 3) for i, d in enumerate(body)) % 10) % 10
+        forms.add(body + str(check))
+    elif len(digits) == 13 and digits.startswith('978'):
+        body = digits[3:12]
+        total = sum(int(d) * (10 - i) for i, d in enumerate(body))
+        check = (11 - total % 11) % 11
+        forms.add(body + ('X' if check == 10 else str(check)))
+    return {form for form in forms if len(form) in (10, 13)}
+
+
+def _owned_book_id(publication):
+    """The visible library book this search result already is, if any."""
+    from sqlalchemy import func, or_
+
+    from .. import calibre_db, db
+    from ..duplicates import normalize_text_for_duplicates
+    isbns = set()
+    for value in publication.get('isbn') or []:
+        isbns |= _isbn_forms(value)
+    if isbns:
+        rows = calibre_db.session.query(db.Identifiers.book).filter(
+            func.lower(db.Identifiers.type).in_(('isbn', 'isbn13', 'isbn10')),
+            func.upper(func.replace(db.Identifiers.val, '-', '')).in_(sorted(isbns))).limit(20).all()
+        for (identifier,) in rows:
+            if _visible_book(identifier):
+                return identifier
+    title, authors = publication.get('title'), publication.get('authors') or []
+    if not title or not authors:
+        return None
+    surnames = {normalize_text_for_duplicates(a).split(' ')[-1] for a in authors if normalize_text_for_duplicates(a)}
+    # Candidates by author, titles compared in Python: a library title often
+    # carries a subtitle the search result does not ("Moby-Dick; or, The Whale").
+    patterns = [re.sub(r'[\\%_]', lambda m: '\\' + m.group(0), name.split()[-1]) for name in authors if name.split()]
+    if not patterns:
+        return None
+    candidates = (calibre_db.session.query(db.Books).join(db.Books.authors)
+        .filter(or_(*[db.Authors.name.ilike('%' + pattern + '%', escape='\\') for pattern in patterns]))
+        .limit(200).all())
+    for book in candidates:
+        if not same_title(book.title, title):
+            continue
+        names = {normalize_text_for_duplicates(a.name).split(' ')[-1] for a in book.authors if a.name}
+        if surnames & names and _visible_book(book.id):
+            return book.id
+    return None
+
+
+def same_title(library_title, result_title):
+    """The same work, allowing for a subtitle on either side."""
+    from ..duplicates import normalize_text_for_duplicates
+    def main(value):
+        return normalize_text_for_duplicates(re.split(r'[:;(\[]', value or '', maxsplit=1)[0])
+    full = normalize_text_for_duplicates(library_title), normalize_text_for_duplicates(result_title)
+    return bool(full[0]) and (full[0] == full[1] or main(library_title) == main(result_title) != '')
+
+
+def _mark_owned(result):
+    """Tag search results already in the library, so the user is not sent to download them."""
+    for publication in result.get('publications', []):
+        if not publication.get('navigation'):
+            continue  # a release row, not a book
+        try:
+            owned = _owned_book_id(publication)
+        except Exception:
+            # Ownership is a hint; a library read problem never fails the search.
+            log.debug('Library ownership check failed for a download search result')
+            owned = None
+        if owned is not None:
+            publication['library_book_id'] = owned
 
 
 @api_v1.route('/admin/acquisition',methods=['GET','PATCH'])
@@ -376,6 +497,8 @@ def acquisition_admin_probe(connection_id):
                 CLIENTS[client.adapter](repo.connection_config(client.id, include_disabled=True).config).probe()
                 result['client_verified'] = True
                 return result
+            if row.adapter == 'downloader':
+                return DownloaderService(repo).probe(value)
             return CatalogService(repo).probe(value)
     return jsonify(_run_private_blocking(probe))
 
@@ -385,7 +508,7 @@ def acquisition_admin_probe(connection_id):
 def acquisition_bootstrap():
     role=admission.account_role(ub.app_DB_path,_owner()) or 0
     with runtime.open_repository(ub.app_DB_path) as repo:
-        return jsonify({'connections':[asdict(row) for row in repo.list_connections() if row.adapter in ('opds', 'newznab')],
+        return jsonify({'connections':[asdict(row) for row in repo.list_connections() if row.adapter in CATALOG_KINDS],
             'can_acquire':bool(role & constants.ROLE_ACQUISITION_AUTO_APPROVE),'runtime':worker_available()})
 
 
@@ -397,13 +520,17 @@ def acquisition_catalog():
     selection,query=request.args.get('selection'),request.args.get('q')
     # Capture account presentation state before leaving the request context.
     language = getattr(current_user, 'locale', None) or 'en'
+    book_search = _book_search(language)
     def browse():
         with runtime.open_repository(database) as repo:
             row = _require_connection(repo,connection_id,catalog=True)
-            service = IndexerService(repo) if row.adapter == 'newznab' else CatalogService(repo, preferred_language=language)
+            service = (IndexerService(repo) if row.adapter == 'newznab'
+                else DownloaderService(repo, book_search=book_search) if row.adapter == 'downloader'
+                else CatalogService(repo, preferred_language=language))
             result=service.browse(owner,connection_id,selection=selection,query=query)
             allowed=admission.configured_media_types(repo.engine)
-            formats={description[0] for media,description in DIRECT_FORMATS.items() if media in allowed}
+            formats={description[0] for media,description in (IMPORTABLE_FORMATS if row.adapter == 'downloader'
+                else DIRECT_FORMATS).items() if media in allowed}
             client_formats=bool(formats & {'EPUB','PDF'})
             if row.adapter == 'newznab' and 'MOBI' in formats:
                 source_config = repo.connection_config(connection_id).config
@@ -411,9 +538,13 @@ def acquisition_catalog():
                     repo, source_config.get('client_id'), allowed_media_types=allowed)
             for section in [result]+result.get('groups',[]):
                 for publication in section.get('publications',[]):
-                    publication['offers']=[offer for offer in publication.get('offers',[]) if offer.get('format') in formats or offer.get('format') in ('NZB', 'Torrent') and client_formats]
+                    publication['offers']=[offer for offer in publication.get('offers',[]) if offer.get('format') in formats or offer.get('format') in ('NZB', 'Torrent') and client_formats
+                        or row.adapter == 'downloader' and offer.get('format') == 'Unknown' and formats]
             return result
-    return jsonify(_run_private_blocking(browse))
+    result = _run_private_blocking(browse)
+    if result.get('protocol') == 'downloader':
+        _mark_owned(result)
+    return jsonify(result)
 
 
 @api_v1.route('/acquisition/jobs',methods=['GET','POST'])
@@ -453,8 +584,26 @@ def acquisition_bundle_books(job_id):
 @_endpoint()
 def acquisition_cancel(job_id):
     with runtime.open_repository(ub.app_DB_path) as repo:
+        before=repo.get_job(_owner(),job_id)
         repo.request_cancel(_owner(),job_id)
-        return jsonify(_job(repo,repo.get_job(_owner(),job_id)))
+        job=repo.get_job(_owner(),job_id)
+        if before.state=='downloading' and job.state=='cancelled':
+            # No worker held it, so none will tell the remote side; do it here.
+            _stop_engine_download(repo,job)
+        return jsonify(_job(repo,job))
+
+
+def _stop_engine_download(repo, job):
+    from ..services.acquisition.downloader import local_engine
+    try:
+        offer = repo.job_offer(job.owner_id, job.id)
+        if offer.get('transport') != 'downloader':
+            return
+        config = repo.connection_config(job.connection_id, include_disabled=True).config
+        _run_private_blocking(lambda: local_engine(config).cancel(offer['task_id']))
+    except Exception:
+        # Best effort: the request is already cancelled here whatever the engine does.
+        log.debug('Could not stop a cancelled engine download')
 
 
 @api_v1.route('/acquisition/jobs/<job_id>/retry',methods=['POST'])
