@@ -11,6 +11,7 @@
  * Must be called inside a wouter <Router> (needs useLocation). Rendered once via
  * <RouteA11y> at the top of the routing tree. See patterns.md → "Route focus".
  */
+import { displayInstanceName } from '../../components/BrandName';
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { useI18n } from '../i18n';
@@ -38,7 +39,7 @@ export function useRouteA11y(instanceName?: string): void {
     // becoming the persistent browser/SR page title (#886).
     if (!ready) return;
 
-    const base = instanceName || 'Calibre-Web NextGen';
+    const base = displayInstanceName(instanceName);
     document.title = base;
     const updateTitle = () => {
       const heading = document.querySelector('main h1')?.textContent?.trim();

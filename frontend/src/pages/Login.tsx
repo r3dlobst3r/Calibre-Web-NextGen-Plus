@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { BookMarked, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/Button';
-import { BrandName } from '../components/BrandName';
+import { BrandName, displayInstanceName } from '../components/BrandName';
 import { Spinner } from '../components/Spinner';
 import { VisuallyHidden } from '../components/VisuallyHidden';
 import { useLogin, useAuthConfig, useRegister, useForgotPassword } from '../lib/queries';
@@ -32,7 +32,7 @@ export function Login() {
 
   // #609: the classic login page titles itself with the configured instance name.
   useEffect(() => {
-    if (cfg?.instance_name) document.title = cfg.instance_name;
+    document.title = displayInstanceName(cfg?.instance_name);
   }, [cfg?.instance_name]);
 
   const reset = () => { setErrorMsg(null); setOkMsg(null); };

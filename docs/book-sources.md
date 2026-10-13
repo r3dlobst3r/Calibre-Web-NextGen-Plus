@@ -50,7 +50,7 @@ A result's navigation or next page opens that exact page in individual catalog b
 
 A catalog may list books without a supported direct file. Purchase, borrowing, DRM, previews, HTML landing pages and indirect acquisition flows are not presented as downloadable files. Inline catalog artwork is optional and is not downloaded.
 
-Anna's Archive is outside this Beta. Shelfmark is deferred because this slice has no inexpensive completion contract that attributes its result to a CWNG request. Torrent results require qBittorrent or Transmission; Usenet clients accept NZB results. The framework separates catalog discovery, file transport and library ingestion so additional protocol adapters can reuse the same permission, request and import boundaries.
+Anna's Archive, LibGen and AudiobookBay are reached through the built-in downloader, which uses these same permission, request and import boundaries. See [Downloads](downloads.md). Torrent results require qBittorrent or Transmission; Usenet clients accept NZB results. The framework separates catalog discovery, file transport and library ingestion so additional protocol adapters can reuse the same permission, request and import boundaries.
 
 OPDS 1 partial catalog entries may advertise an alternate complete-entry document. Open that detail explicitly to see its metadata and supported direct files. Complete entries retain the same transport, account-bound selections, approval and import policy as ordinary feeds; they do not follow their own self-links.
 

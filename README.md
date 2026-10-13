@@ -1,3 +1,35 @@
+# Calibre-Web NextGen+
+
+**Calibre-Web NextGen+** is [Calibre-Web NextGen](https://github.com/new-usemame/Calibre-Web-NextGen) with a built-in book downloader. Search your library as usual; if the book isn't there, switch to **Get more books** and download it straight into the library: ebooks from Anna's Archive and LibGen, audiobooks from AudiobookBay, through your own torrent or debrid client where one is needed.
+
+- **One app.** The downloader runs inside the server. There is no second container and nothing extra to expose.
+- **Your rules.** Who may download, who needs approval and which formats are allowed are the existing *Book sources* settings. Every download is imported through ingest and credited to the person who asked for it.
+- **Configured in the app.** *Administration → Downloads* switches it on and sets up sources, mirrors, download and debrid clients, and the built-in Cloudflare bypass.
+
+The downloader is [Shelfmark](https://github.com/calibrain/shelfmark)'s download engine (MIT), vendored into this project. See **[Downloads](docs/downloads.md)** for how it works and how to set it up.
+
+```yaml
+services:
+  calibre-web:
+    image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
+    container_name: calibre-web-nextgen-plus
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+    volumes:
+      - /path/to/config:/config
+      - /path/to/ingest:/cwa-book-ingest
+      - /path/to/library:/calibre-library
+    ports:
+      - 8083:8083
+    restart: unless-stopped
+```
+
+Everything below is the upstream Calibre-Web NextGen documentation, which applies unchanged; replace its image name with the one above.
+
+---
+
 <p align="center">
   <img src="README_images/calibre-web-nextgen-banner.png" alt="Calibre-Web NextGen" width="520">
 </p>

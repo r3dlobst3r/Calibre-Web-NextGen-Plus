@@ -1,0 +1,3 @@
+### Added
+
+- **Calibre-Web NextGen+: download books into the library.** A library search gets a second tab, **Get more books**. It finds books in Open Library, Hardcover or Google Books, marks the ones already in the library, and lists downloads from Anna's Archive and LibGen, plus audiobooks from AudiobookBay through a torrent or debrid client. Requests follow the book-source rules (access, approval, formats, cancel, retry) and are imported through ingest, credited to the person who asked. **Administration → Downloads** switches it on and configures sources, mirrors, download and debrid clients, the built-in Cloudflare bypass and the network. The downloader is Shelfmark's download engine, vendored into the server; see `docs/downloads.md`.
