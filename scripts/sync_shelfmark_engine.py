@@ -135,6 +135,12 @@ EDITS = [
             text=True,
             env=env_vars,
             cwd=str(env.TMP_DIR),"""),
+    # CWNG always imports through its own ingest, so only the folder output exists.
+    ('download/outputs/__init__.py', """    from . import booklore as booklore
+    from . import email as email
+    from . import folder as folder
+""", """    from . import folder as folder
+"""),
     # Shelfmark keeps its data folder beside the package; the copy keeps it inside.
     ('core/languages.py',
      'LANGUAGE_DATA_PATH = Path(__file__).resolve().parents[1].parent / "data" / "book-languages.json"',

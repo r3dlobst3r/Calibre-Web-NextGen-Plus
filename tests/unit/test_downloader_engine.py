@@ -122,3 +122,45 @@ def test_loading_the_engine_keeps_cwngs_logger_class(engine):
     cwng_logger.create()  # registers CWNG's class
     engine.engine('core.logger').setup_logger('cwng.test.engine')
     assert logging.getLoggerClass() is cwng_logger._Logger
+
+
+def test_every_engine_import_resolves_to_a_vendored_module():
+    """Lazy imports inside functions included: a module the sync left out would
+    otherwise only fail when that code path first runs, mid-download."""
+    import ast
+    root = Path(runtime.__file__).parent / 'engine'
+    package = 'cps.services.downloader.engine'
+
+    def exists(module):
+        parts = module.split('.')
+        if parts[:4] != package.split('.'):
+            return True  # not an engine module
+        target = root.joinpath(*parts[4:])
+        return target.with_suffix('.py').exists() or (target / '__init__.py').exists()
+
+    missing = []
+    for path in root.rglob('*.py'):
+        base = '.'.join([package] + list(path.relative_to(root).parent.parts))
+        for node in ast.walk(ast.parse(path.read_text(encoding='utf-8'))):
+            if isinstance(node, ast.ImportFrom):
+                if node.level:
+                    prefix = base.rsplit('.', node.level - 1)[0] if node.level > 1 else base
+                    module = prefix + ('.' + node.module if node.module else '')
+                else:
+                    module = node.module or ''
+                if not exists(module):
+                    missing.append(f'{path.name}: {module}')
+                elif not node.module:
+                    for alias in node.names:
+                        candidate = module + '.' + alias.name
+                        target = root.joinpath(*candidate.split('.')[4:])
+                        init = root.joinpath(*module.split('.')[4:]) / '__init__.py'
+                        defined = init.exists() and any(
+                            isinstance(item, (ast.FunctionDef, ast.ClassDef)) and item.name == alias.name
+                            or isinstance(item, ast.Assign) and any(getattr(t, 'id', None) == alias.name for t in item.targets)
+                            for item in ast.parse(init.read_text(encoding='utf-8')).body)
+                        if not (target.with_suffix('.py').exists() or (target / '__init__.py').exists() or defined):
+                            missing.append(f'{path.name}: {candidate}')
+            elif isinstance(node, ast.Import):
+                missing.extend(f'{path.name}: {a.name}' for a in node.names if not exists(a.name))
+    assert missing == []

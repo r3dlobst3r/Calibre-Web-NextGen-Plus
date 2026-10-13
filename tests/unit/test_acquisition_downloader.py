@@ -86,7 +86,10 @@ class FakeClient:
 
     def queue(self, payload):
         self.fake.calls.append(('queue', payload['source_id']))
-        self.fake.tasks.setdefault(payload['source_id'], {'status': 'queued', 'added_time': 1000.0})
+        # Like the engine's queue: a release it holds is refused unless it failed.
+        current = self.fake.tasks.get(payload['source_id'])
+        if current is None or current['status'] in ('error', 'cancelled'):
+            self.fake.tasks[payload['source_id']] = {'status': 'queued', 'added_time': 1000.0}
         return True
 
     def download(self, task_id, destination, *, max_bytes, checkpoint=lambda: None):
@@ -455,7 +458,23 @@ def test_retry_after_failure_queues_the_release_again(flow):
     run(worker, now)
     fake.tasks['aaa']['status'] = 'error'
     assert run(worker, now).state == 'failed'
-    del fake.tasks['aaa']
+    # The engine still lists the failed download; the retry must not fail on it.
     repository.retry(1, job.id)
     assert run(worker, now).state == 'downloading'
+    assert fake.tasks['aaa']['status'] == 'queued'
     assert [c for c in fake.calls if c[0] == 'queue'] == [('queue', 'aaa'), ('queue', 'aaa')]
+    fake.tasks['aaa']['status'] = 'error'
+    # A failure seen while following this attempt's own download is final.
+    assert run(worker, now).state == 'failed'
+
+
+def test_a_new_request_after_a_failure_downloads_again(flow):
+    repository, worker, fake, offers, ingest, now = flow
+    repository.create_job(1, offers[('ebook', 'epub')], 'first', requires_approval=False)
+    run(worker, now)
+    fake.tasks['aaa']['status'] = 'error'
+    assert run(worker, now).state == 'failed'
+    repository.create_job(1, offers[('ebook', 'epub')], 'second', requires_approval=False)
+    assert run(worker, now).state == 'downloading' and fake.tasks['aaa']['status'] == 'queued'
+    fake.tasks['aaa']['status'] = 'complete'; fake.files['aaa'] = epub_bytes()
+    assert run(worker, now).state == 'importing'

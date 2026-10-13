@@ -73,8 +73,6 @@ def load_output_handlers() -> None:
     if _OUTPUTS_LOADED:
         return
 
-    from . import booklore as booklore
-    from . import email as email
     from . import folder as folder
 
     _OUTPUTS_LOADED = True

@@ -132,6 +132,9 @@ class AcquisitionWorker:
             return self._reconcile_import(claim)
         repo, job, token = self.repository, claim.job, claim.token
         state = job.state
+        # A claim that starts before `downloading` begins a new attempt (a new
+        # request, or a retry); one that starts there is following its own download.
+        fresh_attempt = state in ('queued', 'resolving')
         private = None
         last_heartbeat = 0.0
         media_type = None
@@ -226,7 +229,7 @@ class AcquisitionWorker:
                     validate_book(source, media_type, max_bytes=self.max_bytes)
                     source_hash = digest(source)
                 elif downloader:
-                    fetched = self._download_engine(offer, config, source, checkpoint, limit)
+                    fetched = self._download_engine(offer, config, source, checkpoint, limit, fresh_attempt)
                     if fetched is None:
                         repo.release(job.id, token, delay_seconds=DOWNLOADER_RECHECK_SECONDS)
                         shutil.rmtree(private)
@@ -353,7 +356,7 @@ class AcquisitionWorker:
         except (StorageError, TransportError, ValueError, KeyError):
             pass
 
-    def _download_engine(self, offer, config, source, checkpoint, limit):
+    def _download_engine(self, offer, config, source, checkpoint, limit, fresh_attempt=False):
         """Queue the release in the download engine, then take a private copy once done.
 
         The engine names a download by the release's own id and refuses to queue it
@@ -367,6 +370,11 @@ class AcquisitionWorker:
             engine.queue(offer['release'])
             return None
         status, task = found
+        if fresh_attempt and status in ('error', 'cancelled'):
+            # An earlier attempt's result, still listed in the engine. This attempt
+            # starts the download again (the engine accepts a failed release back).
+            engine.queue(offer['release'])
+            return None
         if status in DOWNLOADER_ACTIVE_STATES:
             added = task.get('added_time')
             if isinstance(added, (int, float)) and self.clock() - added >= self.download_deadline_seconds:
