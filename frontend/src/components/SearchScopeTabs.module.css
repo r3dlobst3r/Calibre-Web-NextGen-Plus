@@ -1,0 +1,27 @@
+.tabs {
+  display: flex; gap: var(--sp-1);
+  max-width: 1400px; margin: 0 auto; padding: var(--sp-5) var(--sp-5) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  min-height: 40px; padding: 0 var(--sp-3);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  color: var(--text-muted); font-size: var(--fs-sm); font-weight: var(--fw-medium);
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.tab:hover { color: var(--text); }
+.tab[aria-current='page'] { color: var(--text); border-bottom-color: var(--accent); }
+.tab > svg { flex: none; }
+
+/* The library's results keep their own page padding; the outside search
+   gets the same column so the two tabs read as one page. */
+.getMore { max-width: 1100px; margin: 0 auto; padding: var(--sp-5); }
+.getMoreHeading { margin: 0 0 var(--sp-1); font-family: var(--font-display); font-size: var(--fs-xl); }
+.getMoreLede { margin: 0 0 var(--sp-4); color: var(--text-muted); font-size: var(--fs-sm); max-width: 70ch; }
+
+@media (max-width: 560px) {
+  .tabs { padding: var(--sp-3) var(--sp-3) 0; }
+  .getMore { padding: var(--sp-4) var(--sp-3); }
+}

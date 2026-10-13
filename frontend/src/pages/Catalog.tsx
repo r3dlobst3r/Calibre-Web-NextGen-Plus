@@ -1511,6 +1511,12 @@ export function Catalog({ entityKind, entityId, view, defaultFilter, tagPath }: 
               {t('Search the global library for "{query}" instead', { query: search })}
             </Link>
           )}
+          {search && !filtered && !isView && me?.acquisition_access && !me.role?.anonymous && (
+            <Link href={`/?q=${encodeURIComponent(search)}&scope=get`} className={styles.uploadLink}
+              data-testid="search-get-more">
+              {t('Look for "{query}" to download', { query: search })}
+            </Link>
+          )}
         </EmptyState>
         }</>
       ) : isSeries && seriesPresentation === 'list' && !selecting ? (

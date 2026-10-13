@@ -114,3 +114,11 @@ def test_a_missing_task_is_reported_as_unavailable(engine, tmp_path):
     with pytest.raises(runtime.EngineError) as raised:
         local.download('never-queued', tmp_path / 'x.part', max_bytes=10)
     assert raised.value.code == 'artifact_unavailable'
+
+
+def test_loading_the_engine_keeps_cwngs_logger_class(engine):
+    import logging
+    from cps import logger as cwng_logger
+    cwng_logger.create()  # registers CWNG's class
+    engine.engine('core.logger').setup_logger('cwng.test.engine')
+    assert logging.getLoggerClass() is cwng_logger._Logger

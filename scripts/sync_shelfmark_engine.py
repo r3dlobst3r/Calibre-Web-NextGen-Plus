@@ -120,6 +120,12 @@ EDITS = [
     # Logs go to the container log with CWNG's; a second log file is opt-in.
     ('config/env.py', 'ENABLE_LOGGING = string_to_bool(os.getenv("ENABLE_LOGGING", "true"))',
      'ENABLE_LOGGING = string_to_bool(os.getenv("CWNG_DOWNLOADS_FILE_LOG", "false"))'),
+    # The engine builds its loggers directly. Registering its class globally would
+    # replace CWNG's own logger class for every logger created afterwards.
+    ('core/logger.py', """    # Register our custom logger class
+    logging.setLoggerClass(CustomLogger)
+
+""", ""),
     # Shelfmark keeps its data folder beside the package; the copy keeps it inside.
     ('core/languages.py',
      'LANGUAGE_DATA_PATH = Path(__file__).resolve().parents[1].parent / "data" / "book-languages.json"',

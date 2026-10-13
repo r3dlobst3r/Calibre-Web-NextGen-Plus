@@ -42,7 +42,9 @@ export interface AcquisitionInstanceState {
 }
 
 export interface AcquisitionOffer {
-  format: 'EPUB' | 'PDF' | 'MOBI' | 'NZB' | 'Torrent';
+  /** `Unknown` is a download release whose file type is only known once it
+   *  is downloaded; the server checks the bytes before anything is imported. */
+  format: 'EPUB' | 'PDF' | 'MOBI' | 'M4B' | 'M4A' | 'NZB' | 'Torrent' | 'Unknown';
   label: string | null;
   /** Stable per-file display identity — a React key, never an authorization. */
   identity: string;
@@ -67,6 +69,20 @@ export interface AcquisitionPublication {
   description: string | null;
   offers: AcquisitionOffer[];
   navigation: AcquisitionNavigation[];
+  /* Downloader extras. A book result carries cover/year/series/isbn and, when the
+   * library already holds it, the visible book's id. A release row carries its
+   * file details. Other catalogs leave all of these out. */
+  cover_url?: string | null;
+  year?: number | null;
+  subtitle?: string | null;
+  series?: { name: string; position: number | null } | null;
+  isbn?: string[];
+  source?: string | null;
+  library_book_id?: number;
+  format?: string | null;
+  size?: string | null;
+  protocol?: string | null;
+  seeders?: number | null;
 }
 
 export interface AcquisitionSearchCapability {
@@ -89,6 +105,8 @@ export interface AcquisitionCatalog {
   searches: AcquisitionSearchCapability[];
   groups: AcquisitionSection[];
   facets: { title: string; navigation: AcquisitionNavigation[] }[];
+  /** Downloader: sources that could not be searched for this book. */
+  errors?: string[];
 }
 
 export interface AcquisitionReceipt {

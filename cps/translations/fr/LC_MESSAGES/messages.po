@@ -21042,3 +21042,299 @@ msgstr "Afficher la section Lu / Non lu"
 
 #~ msgid "Calibre library rating (1-10)"
 #~ msgstr "Note de la bibliothèque Calibre (1–10)"
+
+#: cps/spa_strings.py
+msgid "A download source is busy. Try again in a moment."
+msgstr "Une source de téléchargement est occupée. Réessayez dans un instant."
+
+#: cps/spa_strings.py
+msgid "Allow downloads"
+msgstr "Autoriser les téléchargements"
+
+#: cps/spa_strings.py
+msgid "An administrator needs to switch on downloads before books can be found here."
+msgstr "Un administrateur doit activer les téléchargements avant de pouvoir trouver des livres ici."
+
+#: cps/spa_strings.py
+msgid "Audiobooks are off; switch on AudiobookBay and a torrent or debrid client to find them."
+msgstr "Les livres audio sont désactivés ; activez AudiobookBay et un client torrent ou debrid pour en trouver."
+
+#: cps/spa_strings.py
+msgid "Audiobooks come from: {sources}."
+msgstr "Les livres audio proviennent de : {sources}."
+
+#: cps/spa_strings.py
+msgid "Book search is not available right now. Try again in a moment."
+msgstr "La recherche de livres n’est pas disponible pour le moment. Réessayez dans un instant."
+
+#: cps/spa_strings.py
+msgid "Book sources need an administrator review first. Open Book sources."
+msgstr "Les sources de livres doivent d’abord être vérifiées par un administrateur. Ouvrez Sources de livres."
+
+#: cps/spa_strings.py
+msgid "Books could not be searched."
+msgstr "La recherche de livres a échoué."
+
+#: cps/spa_strings.py
+msgid "Books found outside your library for \"{q}\". Pick a file and it is downloaded and imported into this library."
+msgstr "Livres trouvés hors de votre bibliothèque pour « {q} ». Choisissez un fichier : il est téléchargé puis importé dans cette bibliothèque."
+
+#: cps/spa_strings.py
+msgid "Books to download"
+msgstr "Livres à télécharger"
+
+#: cps/spa_strings.py
+msgid "Choose…"
+msgstr "Choisir…"
+
+#: cps/spa_strings.py
+msgid "Discard changes"
+msgstr "Annuler les modifications"
+
+#: cps/spa_strings.py
+msgid "Done."
+msgstr "Terminé."
+
+#: cps/spa_strings.py
+msgid "Downloader"
+msgstr "Téléchargeur"
+
+#: cps/spa_strings.py
+msgid "Downloading now"
+msgstr "Téléchargements en cours"
+
+#: cps/spa_strings.py
+msgid "Downloading {title}."
+msgstr "Téléchargement de {title}."
+
+#: cps/spa_strings.py
+msgid "Downloads are not available"
+msgstr "Les téléchargements ne sont pas disponibles"
+
+#: cps/spa_strings.py
+msgid "Downloads are not set up"
+msgstr "Les téléchargements ne sont pas configurés"
+
+#: cps/spa_strings.py
+msgid "Downloads are off."
+msgstr "Les téléchargements sont désactivés."
+
+#: cps/spa_strings.py
+msgid "Downloads are on."
+msgstr "Les téléchargements sont activés."
+
+#: cps/spa_strings.py
+msgid "Downloads are paused right now. Ask an administrator to check Downloads."
+msgstr "Les téléchargements sont en pause. Demandez à un administrateur de vérifier Téléchargements."
+
+#: cps/spa_strings.py
+msgid "Downloads are paused:"
+msgstr "Les téléchargements sont en pause :"
+
+#: cps/spa_strings.py
+msgid "Downloads are switched off. Ask an administrator to check Downloads."
+msgstr "Les téléchargements sont désactivés. Demandez à un administrateur de vérifier Téléchargements."
+
+#: cps/spa_strings.py
+msgid "Downloads for {title}"
+msgstr "Téléchargements pour {title}"
+
+#: cps/spa_strings.py
+msgid "Ebooks come from: {sources}."
+msgstr "Les livres numériques proviennent de : {sources}."
+
+#: cps/spa_strings.py
+msgid "Enter a shorter search."
+msgstr "Saisissez une recherche plus courte."
+
+#: cps/spa_strings.py
+msgid "File"
+msgstr "Fichier"
+
+#: cps/spa_strings.py
+msgid "Find audiobooks"
+msgstr "Trouver des livres audio"
+
+#: cps/spa_strings.py
+msgid "Find books outside your library and download them into it. Readers search as usual and choose Get more books; every download is imported here and credited to the person who asked for it."
+msgstr "Trouvez des livres hors de votre bibliothèque et téléchargez-les dedans. Les lecteurs recherchent comme d’habitude et choisissent Trouver d’autres livres ; chaque téléchargement est importé ici et attribué à la personne qui l’a demandé."
+
+#: cps/spa_strings.py
+msgid "Find downloads"
+msgstr "Trouver des téléchargements"
+
+#: cps/spa_strings.py
+msgid "Finish or cancel the downloads in progress before changing this."
+msgstr "Terminez ou annulez les téléchargements en cours avant de modifier ceci."
+
+#: cps/spa_strings.py
+msgid "Format not supported"
+msgstr "Format non pris en charge"
+
+#: cps/spa_strings.py
+msgid "Get more books"
+msgstr "Trouver d’autres livres"
+
+#: cps/spa_strings.py
+msgid "Hide audiobooks"
+msgstr "Masquer les livres audio"
+
+#: cps/spa_strings.py
+msgid "Hide downloads"
+msgstr "Masquer les téléchargements"
+
+#: cps/spa_strings.py
+msgid "Look for \"{query}\" to download"
+msgstr "Chercher « {query} » à télécharger"
+
+#: cps/spa_strings.py
+msgid "Manage in Downloads"
+msgstr "Gérer dans Téléchargements"
+
+#: cps/spa_strings.py
+msgid "More results"
+msgstr "Plus de résultats"
+
+#: cps/spa_strings.py
+msgid "Move {item} down"
+msgstr "Descendre {item}"
+
+#: cps/spa_strings.py
+msgid "Move {item} up"
+msgstr "Monter {item}"
+
+#: cps/spa_strings.py
+msgid "No books found for \"{q}\"."
+msgstr "Aucun livre trouvé pour « {q} »."
+
+#: cps/spa_strings.py
+msgid "No downloads were found for this book."
+msgstr "Aucun téléchargement trouvé pour ce livre."
+
+#: cps/spa_strings.py
+msgid "No ebook source is switched on yet. Turn one on under Download Sources below."
+msgstr "Aucune source de livres numériques n’est encore activée. Activez-en une dans Sources de téléchargement ci-dessous."
+
+#: cps/spa_strings.py
+msgid "Not available with the current settings."
+msgstr "Indisponible avec les paramètres actuels."
+
+#: cps/spa_strings.py
+msgid "Nothing added yet."
+msgstr "Rien d’ajouté pour l’instant."
+
+#: cps/spa_strings.py
+msgid "Nothing to set here right now."
+msgstr "Rien à régler ici pour le moment."
+
+#: cps/spa_strings.py
+msgid "One per line"
+msgstr "Un par ligne"
+
+#: cps/spa_strings.py
+msgid "Open Book sources"
+msgstr "Ouvrir Sources de livres"
+
+#: cps/spa_strings.py
+msgid "Remove row {number}"
+msgstr "Supprimer la ligne {number}"
+
+#: cps/spa_strings.py
+msgid "Request"
+msgstr "Demander"
+
+#: cps/spa_strings.py
+msgid "Requests are switched off, so nobody can download yet. Turn them on and choose who may download in Book sources."
+msgstr "Les demandes sont désactivées : personne ne peut encore télécharger. Activez-les et choisissez qui peut télécharger dans Sources de livres."
+
+#: cps/spa_strings.py
+msgid "Restart needed"
+msgstr "Redémarrage requis"
+
+#: cps/spa_strings.py
+msgid "Saved. Leave blank to keep it."
+msgstr "Enregistré. Laissez vide pour le conserver."
+
+#: cps/spa_strings.py
+msgid "Saved. Restart the server for this to take effect."
+msgstr "Enregistré. Redémarrez le serveur pour appliquer ce changement."
+
+#: cps/spa_strings.py
+msgid "Search books with"
+msgstr "Rechercher les livres avec"
+
+#: cps/spa_strings.py
+msgid "Search in"
+msgstr "Rechercher dans"
+
+#: cps/spa_strings.py
+msgid "Searching download sources… this can take up to a minute."
+msgstr "Recherche dans les sources de téléchargement… cela peut prendre jusqu’à une minute."
+
+#: cps/spa_strings.py
+msgid "See all your requests"
+msgstr "Voir toutes vos demandes"
+
+#: cps/spa_strings.py
+msgid "Set by the server environment."
+msgstr "Défini par l’environnement du serveur."
+
+#: cps/spa_strings.py
+msgid "Set up downloads"
+msgstr "Configurer les téléchargements"
+
+#: cps/spa_strings.py
+msgid "Settings sections"
+msgstr "Sections des paramètres"
+
+#: cps/spa_strings.py
+msgid "Some sources could not be searched"
+msgstr "Certaines sources n’ont pas pu être interrogées"
+
+#: cps/spa_strings.py
+msgid "Sources and clients"
+msgstr "Sources et clients"
+
+#: cps/spa_strings.py
+msgid "That choice expired. Search again and pick the file again."
+msgstr "Ce choix a expiré. Relancez la recherche et choisissez de nouveau le fichier."
+
+#: cps/spa_strings.py
+msgid "That did not work."
+msgstr "Cela n’a pas fonctionné."
+
+#: cps/spa_strings.py
+msgid "That result expired. Search again."
+msgstr "Ce résultat a expiré. Relancez la recherche."
+
+#: cps/spa_strings.py
+msgid "The change could not be saved."
+msgstr "La modification n’a pas pu être enregistrée."
+
+#: cps/spa_strings.py
+msgid "The download could not be started."
+msgstr "Le téléchargement n’a pas pu démarrer."
+
+#: cps/spa_strings.py
+msgid "The download settings could not be loaded."
+msgstr "Les paramètres de téléchargement n’ont pas pu être chargés."
+
+#: cps/spa_strings.py
+msgid "The settings were not saved."
+msgstr "Les paramètres n’ont pas été enregistrés."
+
+#: cps/spa_strings.py
+msgid "This account cannot request books, or requests are switched off."
+msgstr "Ce compte ne peut pas demander de livres, ou les demandes sont désactivées."
+
+#: cps/spa_strings.py
+msgid "Who may download, and whether they need approval, is set under Book sources."
+msgstr "Qui peut télécharger, et s’il faut une approbation, se règle dans Sources de livres."
+
+#: cps/spa_strings.py
+msgid "Working…"
+msgstr "En cours…"
+
+#: cps/spa_strings.py
+msgid "{series} #{position}"
+msgstr "{series} nº {position}"

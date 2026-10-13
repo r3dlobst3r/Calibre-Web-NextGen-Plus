@@ -55,6 +55,14 @@ DYNAMIC_PYTHON_READERS = frozenset(
     }
 )
 
+# The download engine vendored from Shelfmark (scripts/sync_shelfmark_engine.py). Like
+# Shelfmark, it lets any of its settings be set by an environment variable named after
+# the setting, read through its settings registry; those settings are documented and
+# edited in Admin → Downloads, not here. Inside it, only the CWNG_DOWNLOADS_* names
+# that CWNG introduced are part of this SSOT, and its other reads are its own.
+VENDORED_ENGINE = ROOT / "cps" / "services" / "downloader" / "engine"
+VENDORED_ENGINE_PREFIX = "CWNG_DOWNLOADS_"
+
 # These names are intentionally outside the deployment SSOT. Each is owned by an
 # external runtime/tool rather than accepted as CWNG configuration.
 SSOT_EXCEPTIONS = {
@@ -300,6 +308,10 @@ def _python_env_reads() -> tuple[dict[str, set[str]], list[str]]:
             found, source_unresolved = _python_env_reads_from_source(
                 path, path.read_text(encoding="utf-8")
             )
+            if VENDORED_ENGINE in path.parents:
+                found = {key: value for key, value in found.items()
+                         if key.startswith(VENDORED_ENGINE_PREFIX)}
+                source_unresolved = []
             unresolved.extend(source_unresolved)
             for key, locations in found.items():
                 reads.setdefault(key, set()).update(locations)

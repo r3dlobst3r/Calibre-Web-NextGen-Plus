@@ -20426,3 +20426,299 @@ msgstr "Toon gelezen/niet gelezen selectie"
 
 #~ msgid "Calibre library rating (1-10)"
 #~ msgstr "Calibre-bibliotheekbeoordeling (1–10)"
+
+#: cps/spa_strings.py
+msgid "A download source is busy. Try again in a moment."
+msgstr "Een downloadbron is bezig. Probeer het zo opnieuw."
+
+#: cps/spa_strings.py
+msgid "Allow downloads"
+msgstr "Downloads toestaan"
+
+#: cps/spa_strings.py
+msgid "An administrator needs to switch on downloads before books can be found here."
+msgstr "Een beheerder moet downloads inschakelen voordat hier boeken gevonden kunnen worden."
+
+#: cps/spa_strings.py
+msgid "Audiobooks are off; switch on AudiobookBay and a torrent or debrid client to find them."
+msgstr "Luisterboeken staan uit; schakel AudiobookBay en een torrent- of debridclient in om ze te vinden."
+
+#: cps/spa_strings.py
+msgid "Audiobooks come from: {sources}."
+msgstr "Luisterboeken komen van: {sources}."
+
+#: cps/spa_strings.py
+msgid "Book search is not available right now. Try again in a moment."
+msgstr "Boeken zoeken is nu niet beschikbaar. Probeer het zo opnieuw."
+
+#: cps/spa_strings.py
+msgid "Book sources need an administrator review first. Open Book sources."
+msgstr "Boekbronnen moeten eerst door een beheerder worden nagekeken. Open Boekbronnen."
+
+#: cps/spa_strings.py
+msgid "Books could not be searched."
+msgstr "Er kon niet naar boeken worden gezocht."
+
+#: cps/spa_strings.py
+msgid "Books found outside your library for \"{q}\". Pick a file and it is downloaded and imported into this library."
+msgstr "Boeken buiten je bibliotheek gevonden voor ‘{q}’. Kies een bestand en het wordt gedownload en in deze bibliotheek geïmporteerd."
+
+#: cps/spa_strings.py
+msgid "Books to download"
+msgstr "Boeken om te downloaden"
+
+#: cps/spa_strings.py
+msgid "Choose…"
+msgstr "Kies…"
+
+#: cps/spa_strings.py
+msgid "Discard changes"
+msgstr "Wijzigingen verwerpen"
+
+#: cps/spa_strings.py
+msgid "Done."
+msgstr "Klaar."
+
+#: cps/spa_strings.py
+msgid "Downloader"
+msgstr "Downloader"
+
+#: cps/spa_strings.py
+msgid "Downloading now"
+msgstr "Nu aan het downloaden"
+
+#: cps/spa_strings.py
+msgid "Downloading {title}."
+msgstr "{title} wordt gedownload."
+
+#: cps/spa_strings.py
+msgid "Downloads are not available"
+msgstr "Downloads zijn niet beschikbaar"
+
+#: cps/spa_strings.py
+msgid "Downloads are not set up"
+msgstr "Downloads zijn niet ingesteld"
+
+#: cps/spa_strings.py
+msgid "Downloads are off."
+msgstr "Downloads staan uit."
+
+#: cps/spa_strings.py
+msgid "Downloads are on."
+msgstr "Downloads staan aan."
+
+#: cps/spa_strings.py
+msgid "Downloads are paused right now. Ask an administrator to check Downloads."
+msgstr "Downloads zijn momenteel gepauzeerd. Vraag een beheerder Downloads te controleren."
+
+#: cps/spa_strings.py
+msgid "Downloads are paused:"
+msgstr "Downloads zijn gepauzeerd:"
+
+#: cps/spa_strings.py
+msgid "Downloads are switched off. Ask an administrator to check Downloads."
+msgstr "Downloads staan uit. Vraag een beheerder Downloads te controleren."
+
+#: cps/spa_strings.py
+msgid "Downloads for {title}"
+msgstr "Downloads voor {title}"
+
+#: cps/spa_strings.py
+msgid "Ebooks come from: {sources}."
+msgstr "E-books komen van: {sources}."
+
+#: cps/spa_strings.py
+msgid "Enter a shorter search."
+msgstr "Voer een kortere zoekopdracht in."
+
+#: cps/spa_strings.py
+msgid "File"
+msgstr "Bestand"
+
+#: cps/spa_strings.py
+msgid "Find audiobooks"
+msgstr "Luisterboeken zoeken"
+
+#: cps/spa_strings.py
+msgid "Find books outside your library and download them into it. Readers search as usual and choose Get more books; every download is imported here and credited to the person who asked for it."
+msgstr "Vind boeken buiten je bibliotheek en download ze erin. Lezers zoeken zoals gewoonlijk en kiezen Meer boeken halen; elke download wordt hier geïmporteerd en toegeschreven aan wie erom vroeg."
+
+#: cps/spa_strings.py
+msgid "Find downloads"
+msgstr "Downloads zoeken"
+
+#: cps/spa_strings.py
+msgid "Finish or cancel the downloads in progress before changing this."
+msgstr "Rond de lopende downloads af of annuleer ze voordat je dit wijzigt."
+
+#: cps/spa_strings.py
+msgid "Format not supported"
+msgstr "Formaat niet ondersteund"
+
+#: cps/spa_strings.py
+msgid "Get more books"
+msgstr "Meer boeken halen"
+
+#: cps/spa_strings.py
+msgid "Hide audiobooks"
+msgstr "Luisterboeken verbergen"
+
+#: cps/spa_strings.py
+msgid "Hide downloads"
+msgstr "Downloads verbergen"
+
+#: cps/spa_strings.py
+msgid "Look for \"{query}\" to download"
+msgstr "Zoek ‘{query}’ om te downloaden"
+
+#: cps/spa_strings.py
+msgid "Manage in Downloads"
+msgstr "Beheren in Downloads"
+
+#: cps/spa_strings.py
+msgid "More results"
+msgstr "Meer resultaten"
+
+#: cps/spa_strings.py
+msgid "Move {item} down"
+msgstr "{item} omlaag verplaatsen"
+
+#: cps/spa_strings.py
+msgid "Move {item} up"
+msgstr "{item} omhoog verplaatsen"
+
+#: cps/spa_strings.py
+msgid "No books found for \"{q}\"."
+msgstr "Geen boeken gevonden voor ‘{q}’."
+
+#: cps/spa_strings.py
+msgid "No downloads were found for this book."
+msgstr "Er zijn geen downloads gevonden voor dit boek."
+
+#: cps/spa_strings.py
+msgid "No ebook source is switched on yet. Turn one on under Download Sources below."
+msgstr "Er staat nog geen e-bookbron aan. Zet er een aan onder Downloadbronnen hieronder."
+
+#: cps/spa_strings.py
+msgid "Not available with the current settings."
+msgstr "Niet beschikbaar met de huidige instellingen."
+
+#: cps/spa_strings.py
+msgid "Nothing added yet."
+msgstr "Nog niets toegevoegd."
+
+#: cps/spa_strings.py
+msgid "Nothing to set here right now."
+msgstr "Hier valt nu niets in te stellen."
+
+#: cps/spa_strings.py
+msgid "One per line"
+msgstr "Eén per regel"
+
+#: cps/spa_strings.py
+msgid "Open Book sources"
+msgstr "Boekbronnen openen"
+
+#: cps/spa_strings.py
+msgid "Remove row {number}"
+msgstr "Rij {number} verwijderen"
+
+#: cps/spa_strings.py
+msgid "Request"
+msgstr "Aanvragen"
+
+#: cps/spa_strings.py
+msgid "Requests are switched off, so nobody can download yet. Turn them on and choose who may download in Book sources."
+msgstr "Aanvragen staan uit, dus niemand kan al downloaden. Zet ze aan en kies in Boekbronnen wie mag downloaden."
+
+#: cps/spa_strings.py
+msgid "Restart needed"
+msgstr "Herstart nodig"
+
+#: cps/spa_strings.py
+msgid "Saved. Leave blank to keep it."
+msgstr "Opgeslagen. Laat leeg om te behouden."
+
+#: cps/spa_strings.py
+msgid "Saved. Restart the server for this to take effect."
+msgstr "Opgeslagen. Herstart de server om dit toe te passen."
+
+#: cps/spa_strings.py
+msgid "Search books with"
+msgstr "Boeken zoeken met"
+
+#: cps/spa_strings.py
+msgid "Search in"
+msgstr "Zoeken in"
+
+#: cps/spa_strings.py
+msgid "Searching download sources… this can take up to a minute."
+msgstr "Downloadbronnen doorzoeken… dit kan tot een minuut duren."
+
+#: cps/spa_strings.py
+msgid "See all your requests"
+msgstr "Al je aanvragen bekijken"
+
+#: cps/spa_strings.py
+msgid "Set by the server environment."
+msgstr "Ingesteld door de serveromgeving."
+
+#: cps/spa_strings.py
+msgid "Set up downloads"
+msgstr "Downloads instellen"
+
+#: cps/spa_strings.py
+msgid "Settings sections"
+msgstr "Instellingsonderdelen"
+
+#: cps/spa_strings.py
+msgid "Some sources could not be searched"
+msgstr "Sommige bronnen konden niet worden doorzocht"
+
+#: cps/spa_strings.py
+msgid "Sources and clients"
+msgstr "Bronnen en clients"
+
+#: cps/spa_strings.py
+msgid "That choice expired. Search again and pick the file again."
+msgstr "Die keuze is verlopen. Zoek opnieuw en kies het bestand opnieuw."
+
+#: cps/spa_strings.py
+msgid "That did not work."
+msgstr "Dat is niet gelukt."
+
+#: cps/spa_strings.py
+msgid "That result expired. Search again."
+msgstr "Dat resultaat is verlopen. Zoek opnieuw."
+
+#: cps/spa_strings.py
+msgid "The change could not be saved."
+msgstr "De wijziging kon niet worden opgeslagen."
+
+#: cps/spa_strings.py
+msgid "The download could not be started."
+msgstr "De download kon niet worden gestart."
+
+#: cps/spa_strings.py
+msgid "The download settings could not be loaded."
+msgstr "De downloadinstellingen konden niet worden geladen."
+
+#: cps/spa_strings.py
+msgid "The settings were not saved."
+msgstr "De instellingen zijn niet opgeslagen."
+
+#: cps/spa_strings.py
+msgid "This account cannot request books, or requests are switched off."
+msgstr "Dit account kan geen boeken aanvragen, of aanvragen staan uit."
+
+#: cps/spa_strings.py
+msgid "Who may download, and whether they need approval, is set under Book sources."
+msgstr "Wie mag downloaden, en of goedkeuring nodig is, stel je in bij Boekbronnen."
+
+#: cps/spa_strings.py
+msgid "Working…"
+msgstr "Bezig…"
+
+#: cps/spa_strings.py
+msgid "{series} #{position}"
+msgstr "{series} #{position}"

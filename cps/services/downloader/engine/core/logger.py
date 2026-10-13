@@ -158,9 +158,6 @@ def setup_logger(name: str, log_file: Path = LOG_FILE) -> CustomLogger:
         CustomLogger: Configured logger instance with error_trace method
 
     """
-    # Register our custom logger class
-    logging.setLoggerClass(CustomLogger)
-
     # Create logger as CustomLogger instance
     logger = CustomLogger(name)
     log_level = getattr(logging, LOG_LEVEL, logging.INFO)
