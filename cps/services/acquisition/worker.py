@@ -18,11 +18,12 @@ from .contracts import DIRECT_FORMATS, MOBI_MEDIA_TYPE, direct_format_allowed
 from .http import TransportError, run_transfer
 from .staging import (StagingError, cleanup_settled, digest, discard_publication, persist_capability,
                       publish, publication_state, validate_book)
-from .storage import Conflict
+from .storage import Conflict, StorageError
 from .clients import CLIENTS, USENET_KINDS, TORRENT_KINDS, torrent_book, torrent_books
 from .torrent import magnet_identities, validate_torrent
 from .sabnzbd import SABClient, ClientError, completed_book, completed_books, open_completed_file, validate_nzb, _safe_root
 from .bundle_files import fingerprint_candidates
+from .shelfmark import ACTIVE_STATES as SHELFMARK_ACTIVE_STATES, ShelfmarkClient, ShelfmarkError, UNKNOWN_MEDIA
 
 # A conversion of a large book can legitimately run for a long time, and a
 # terminal processor result is reported explicitly, so this bound only exists
@@ -34,6 +35,31 @@ IMPORT_RECHECK_SECONDS = 30
 
 
 DOWNLOAD_DEADLINE_SECONDS = 7 * 24 * 60 * 60
+# Shelfmark works its own queue; asking again sooner only adds status traffic.
+SHELFMARK_RECHECK_SECONDS = 15
+
+
+def sniff_media_type(source, *, max_bytes):
+    """The importable format of a staged file whose source did not promise one."""
+    with source.open('rb') as stream:
+        signature = stream.read(68)
+    # Magic selects the existing strict byte validator; it never grants
+    # admission on its own.
+    media_type = ('application/pdf' if signature[:5] == b'%PDF-' else
+                  MOBI_MEDIA_TYPE if signature[60:68] == b'BOOKMOBI' else
+                  'application/epub+zip')
+    if signature[:5] == b'%PDF-' and signature[60:68] == b'BOOKMOBI':
+        # A legal PalmDB name can begin with the PDF marker, and a
+        # legal PDF can contain BOOKMOBI at this offset. Resolve
+        # that ambiguity with the existing full validators.
+        try:
+            validate_book(source, MOBI_MEDIA_TYPE, max_bytes=max_bytes)
+        except StagingError:
+            pass  # Still requires the PDF validator below.
+        else:
+            media_type = MOBI_MEDIA_TYPE
+    validate_book(source, media_type, max_bytes=max_bytes)
+    return media_type
 
 
 class Paused(Exception):
@@ -50,9 +76,12 @@ class AcquisitionWorker:
                  transfer=run_transfer, max_bytes=100 * 1024 * 1024,
                  import_deadline_seconds=IMPORT_DEADLINE_SECONDS,
                  import_recheck_seconds=IMPORT_RECHECK_SECONDS, client_factory=None,
-                 download_deadline_seconds=DOWNLOAD_DEADLINE_SECONDS):
+                 download_deadline_seconds=DOWNLOAD_DEADLINE_SECONDS, shelfmark_factory=ShelfmarkClient,
+                 clock=time.time):
         self.repository = repository
         self.client_factory = client_factory
+        self.shelfmark_factory = shelfmark_factory
+        self.clock = clock
         self.download_deadline_seconds = download_deadline_seconds
         self.staging_dir, self.ingest_dir = Path(staging_dir), Path(ingest_dir)
         self.allowed, self.enabled, self.transfer = allowed, enabled, transfer
@@ -98,6 +127,8 @@ class AcquisitionWorker:
         last_heartbeat = 0.0
         media_type = None
         usenet = False
+        shelfmark = False
+        offer = config = None
 
         def checkpoint():
             nonlocal last_heartbeat
@@ -140,12 +171,15 @@ class AcquisitionWorker:
             checkpoint()
             material = repo.material(job.id, token)
             offer, config = material.offer, material.config
+            shelfmark = offer.get('transport') == 'shelfmark'
             if (offer.get('kind') != 'acquisition'
-                    or offer.get('media_type') not in tuple(DIRECT_FORMATS) + ('application/x-nzb', 'application/x-bittorrent')):
+                    or offer.get('media_type') not in tuple(DIRECT_FORMATS) + ('application/x-nzb', 'application/x-bittorrent')
+                    and not (shelfmark and offer.get('media_type') == UNKNOWN_MEDIA)):
                 raise TransportError('unsupported_offer')
             usenet = offer.get('transport') in ('nzb', 'torrent')
-            media_type = None if usenet else offer['media_type']
-            if not usenet and not direct_format_allowed(media_type, config):
+            # A Shelfmark release of unknown format is judged by its bytes once fetched.
+            media_type = None if usenet or offer['media_type'] == UNKNOWN_MEDIA else offer['media_type']
+            if media_type is not None and not direct_format_allowed(media_type, config):
                 raise TransportError('unsupported_offer')
             checkpoint()
             extension = DIRECT_FORMATS.get(media_type, (None, None))[1]
@@ -177,6 +211,16 @@ class AcquisitionWorker:
                     checkpoint()
                     validate_book(source, media_type, max_bytes=self.max_bytes)
                     source_hash = digest(source)
+                elif shelfmark:
+                    fetched = self._download_shelfmark(job, offer, config, source, checkpoint)
+                    if fetched is None:
+                        repo.release(job.id, token, delay_seconds=SHELFMARK_RECHECK_SECONDS)
+                        shutil.rmtree(private)
+                        return repo.get_job(job.owner_id, job.id)
+                    media_type, source_hash = fetched
+                    checkpoint()
+                    if digest(source) != source_hash:
+                        raise StagingError('source_changed')
                 else:
                     downloaded = self.transfer(offer['href'], policy(config, download=True),
                         destination=source, max_bytes=self.max_bytes, checkpoint=checkpoint)
@@ -186,31 +230,18 @@ class AcquisitionWorker:
                     source_hash = downloaded.sha256
                 checkpoint()
                 advance('staged', source_sha256=source_hash, staging_key=token)
+                if shelfmark:
+                    # The staged copy is durable now, so Shelfmark's file can go.
+                    self.shelfmark_factory(config).discard(offer['task_id'])
             source_hash, staging_key = repo.staged_identity(job.id, token)
             private = self._directory(job.id, staging_key)
             source = private / 'source.part'
             if digest(source) != source_hash:
                 raise StagingError('source_changed')
-            if usenet:
-                with source.open('rb') as stream:
-                    signature = stream.read(68)
+            if usenet or shelfmark:
                 # A staged client source is already hash-bound, but its format
-                # must survive a new worker. Magic selects the existing strict
-                # byte validator; it never grants admission on its own.
-                media_type = ('application/pdf' if signature[:5] == b'%PDF-' else
-                              MOBI_MEDIA_TYPE if signature[60:68] == b'BOOKMOBI' else
-                              'application/epub+zip')
-                if signature[:5] == b'%PDF-' and signature[60:68] == b'BOOKMOBI':
-                    # A legal PalmDB name can begin with the PDF marker, and a
-                    # legal PDF can contain BOOKMOBI at this offset. Resolve
-                    # that ambiguity with the existing full validators.
-                    try:
-                        validate_book(source, MOBI_MEDIA_TYPE, max_bytes=self.max_bytes)
-                    except StagingError:
-                        pass  # Still requires the PDF validator below.
-                    else:
-                        media_type = MOBI_MEDIA_TYPE
-                validate_book(source, media_type, max_bytes=self.max_bytes)
+                # must survive a new worker.
+                media_type = sniff_media_type(source, max_bytes=self.max_bytes)
                 extension = DIRECT_FORMATS[media_type][1]
             token_path = private / 'publication.token'
             if token_path.exists() or token_path.is_symlink():
@@ -253,6 +284,8 @@ class AcquisitionWorker:
             repo.release(job.id, token,
                 delay_seconds=self.import_recheck_seconds if state == 'importing' else 5)
         except Cancelled:
+            if state == 'downloading':
+                self._stop_shelfmark(job, offer, config)
             settle(lambda: advance('cancelled'))
         except Paused:
             settle(lambda: repo.release(job.id, token, delay_seconds=5))
@@ -286,6 +319,57 @@ class AcquisitionWorker:
         if current.state in ('imported', 'failed', 'cancelled'):
             self._cleanup(job.id)
         return current
+
+    def _stop_shelfmark(self, job, offer, config):
+        """Stop a Shelfmark download nobody is waiting for any more; best effort only.
+
+        Cancellation can be noticed before this claim has read its offer, so the
+        durable offer and current connection are read here when needed.
+        """
+        try:
+            offer = offer if offer is not None else self.repository.job_offer(job.owner_id, job.id)
+            if offer.get('transport') != 'shelfmark':
+                return
+            if config is None:
+                config = self.repository.connection_config(job.connection_id, include_disabled=True).config
+            self.shelfmark_factory(config).cancel(offer['task_id'])
+        except (StorageError, TransportError, ValueError, KeyError):
+            pass
+
+    def _download_shelfmark(self, job, offer, config, source, checkpoint):
+        """Queue the release in Shelfmark, then take a private copy once it is done.
+
+        Shelfmark names a queue entry by the release's own id and refuses to queue
+        it twice, so a resubmission after a lost response cannot start a second
+        download. None means "not finished yet, ask again later".
+        """
+        client = self.shelfmark_factory(config)
+        task_id = offer['task_id']
+        found = client.task(task_id)
+        if found is None:
+            client.queue(offer['release'])
+            return None
+        status, task = found
+        if status in SHELFMARK_ACTIVE_STATES:
+            added = task.get('added_time')
+            if isinstance(added, (int, float)) and self.clock() - added >= self.download_deadline_seconds:
+                raise ShelfmarkError('client_job_stalled')
+            return None
+        if status != 'complete':
+            # error, or cancelled from Shelfmark's side. Retrying the CWNG job
+            # queues the release again.
+            raise ShelfmarkError('client_job_failed')
+        checkpoint()
+        source_hash = client.download(task_id, source, max_bytes=self.max_bytes, checkpoint=checkpoint)
+        try:
+            media_type = sniff_media_type(source, max_bytes=self.max_bytes)
+        except StagingError:
+            source.unlink(missing_ok=True)
+            raise ShelfmarkError('no_usable_book') from None
+        if not self.media_allowed(media_type) or not direct_format_allowed(media_type, config):
+            source.unlink(missing_ok=True)
+            raise ShelfmarkError('format_not_allowed')
+        return media_type, source_hash
 
     def _client_material(self, offer):
         clients = [row for row in self.repository.list_connections() if row.id == offer.get('client_id')

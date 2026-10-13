@@ -20426,3 +20426,323 @@ msgstr "Toon gelezen/niet gelezen selectie"
 
 #~ msgid "Calibre library rating (1-10)"
 #~ msgstr "Calibre-bibliotheekbeoordeling (1–10)"
+
+#: cps/spa_strings.py
+msgid "Address"
+msgstr "Adres"
+
+#: cps/spa_strings.py
+msgid "An administrator needs to connect the download service before books can be found here."
+msgstr "Een beheerder moet de downloadservice koppelen voordat hier boeken gevonden kunnen worden."
+
+#: cps/spa_strings.py
+msgid "Book sources need an administrator review first. Open Book sources."
+msgstr "Boekbronnen moeten eerst door een beheerder worden nagekeken. Open Boekbronnen."
+
+#: cps/spa_strings.py
+msgid "Books found outside your library for \"{q}\". Pick a file and it is downloaded and imported into this library."
+msgstr "Boeken buiten je bibliotheek gevonden voor ‘{q}’. Kies een bestand en het wordt gedownload en in deze bibliotheek geïmporteerd."
+
+#: cps/spa_strings.py
+msgid "Books to download"
+msgstr "Boeken om te downloaden"
+
+#: cps/spa_strings.py
+msgid "Check the address (http://host:port) and the API key."
+msgstr "Controleer het adres (http://host:poort) en de API-sleutel."
+
+#: cps/spa_strings.py
+msgid "Choose…"
+msgstr "Kies…"
+
+#: cps/spa_strings.py
+msgid "Connect"
+msgstr "Koppelen"
+
+#: cps/spa_strings.py
+msgid "Connected to {endpoint}."
+msgstr "Gekoppeld met {endpoint}."
+
+#: cps/spa_strings.py
+msgid "Connected."
+msgstr "Gekoppeld."
+
+#: cps/spa_strings.py
+msgid "Connected. Open Library was switched on so books can be searched."
+msgstr "Gekoppeld. Open Library is ingeschakeld zodat er naar boeken gezocht kan worden."
+
+#: cps/spa_strings.py
+msgid "Connecting…"
+msgstr "Bezig met koppelen…"
+
+#: cps/spa_strings.py
+msgid "Discard changes"
+msgstr "Wijzigingen verwerpen"
+
+#: cps/spa_strings.py
+msgid "Done."
+msgstr "Klaar."
+
+#: cps/spa_strings.py
+msgid "Download service"
+msgstr "Downloadservice"
+
+#: cps/spa_strings.py
+msgid "Downloading {title}."
+msgstr "{title} wordt gedownload."
+
+#: cps/spa_strings.py
+msgid "Downloads are not available"
+msgstr "Downloads zijn niet beschikbaar"
+
+#: cps/spa_strings.py
+msgid "Downloads are not set up"
+msgstr "Downloads zijn niet ingesteld"
+
+#: cps/spa_strings.py
+msgid "Downloads are paused right now. Ask an administrator to check Downloads."
+msgstr "Downloads zijn momenteel gepauzeerd. Vraag een beheerder Downloads te controleren."
+
+#: cps/spa_strings.py
+msgid "Downloads are paused:"
+msgstr "Downloads zijn gepauzeerd:"
+
+#: cps/spa_strings.py
+msgid "Downloads for {title}"
+msgstr "Downloads voor {title}"
+
+#: cps/spa_strings.py
+msgid "Enter a shorter search."
+msgstr "Voer een kortere zoekopdracht in."
+
+#: cps/spa_strings.py
+msgid "Enter address and key"
+msgstr "Adres en sleutel invoeren"
+
+#: cps/spa_strings.py
+msgid "File"
+msgstr "Bestand"
+
+#: cps/spa_strings.py
+msgid "Find downloads"
+msgstr "Downloads zoeken"
+
+#: cps/spa_strings.py
+msgid "Format not supported"
+msgstr "Formaat niet ondersteund"
+
+#: cps/spa_strings.py
+msgid "Get more books"
+msgstr "Meer boeken halen"
+
+#: cps/spa_strings.py
+msgid "Hide downloads"
+msgstr "Downloads verbergen"
+
+#: cps/spa_strings.py
+msgid "Look for \"{query}\" to download"
+msgstr "Zoek ‘{query}’ om te downloaden"
+
+#: cps/spa_strings.py
+msgid "Manage in Downloads"
+msgstr "Beheren in Downloads"
+
+#: cps/spa_strings.py
+msgid "More results"
+msgstr "Meer resultaten"
+
+#: cps/spa_strings.py
+msgid "Move {item} down"
+msgstr "{item} omlaag verplaatsen"
+
+#: cps/spa_strings.py
+msgid "Move {item} up"
+msgstr "{item} omhoog verplaatsen"
+
+#: cps/spa_strings.py
+msgid "No address or API key is set. Set SHELFMARK_URL and SHELFMARK_API_KEY, or enter them below."
+msgstr "Er is geen adres of API-sleutel ingesteld. Stel SHELFMARK_URL en SHELFMARK_API_KEY in, of voer ze hieronder in."
+
+#: cps/spa_strings.py
+msgid "No books found for \"{q}\"."
+msgstr "Geen boeken gevonden voor ‘{q}’."
+
+#: cps/spa_strings.py
+msgid "No downloads were found for this book."
+msgstr "Er zijn geen downloads gevonden voor dit boek."
+
+#: cps/spa_strings.py
+msgid "Not available with the current settings."
+msgstr "Niet beschikbaar met de huidige instellingen."
+
+#: cps/spa_strings.py
+msgid "Not set up. Set SHELFMARK_URL and SHELFMARK_API_KEY for this server, or enter them below."
+msgstr "Niet ingesteld. Stel SHELFMARK_URL en SHELFMARK_API_KEY in voor deze server, of voer ze hieronder in."
+
+#: cps/spa_strings.py
+msgid "Nothing added yet."
+msgstr "Nog niets toegevoegd."
+
+#: cps/spa_strings.py
+msgid "Nothing to set here right now."
+msgstr "Hier valt nu niets in te stellen."
+
+#: cps/spa_strings.py
+msgid "One per line"
+msgstr "Eén per regel"
+
+#: cps/spa_strings.py
+msgid "Open Book sources"
+msgstr "Boekbronnen openen"
+
+#: cps/spa_strings.py
+msgid "Ready to connect to {endpoint}."
+msgstr "Klaar om te koppelen met {endpoint}."
+
+#: cps/spa_strings.py
+msgid "Reconnect"
+msgstr "Opnieuw koppelen"
+
+#: cps/spa_strings.py
+msgid "Remove row {number}"
+msgstr "Rij {number} verwijderen"
+
+#: cps/spa_strings.py
+msgid "Request"
+msgstr "Aanvragen"
+
+#: cps/spa_strings.py
+msgid "Requests are switched off, so nobody can download yet. Turn them on and choose who may download in Book sources."
+msgstr "Aanvragen staan uit, dus niemand kan al downloaden. Zet ze aan en kies in Boekbronnen wie mag downloaden."
+
+#: cps/spa_strings.py
+msgid "Restart needed"
+msgstr "Herstart nodig"
+
+#: cps/spa_strings.py
+msgid "Saved. Leave blank to keep it."
+msgstr "Opgeslagen. Laat leeg om te behouden."
+
+#: cps/spa_strings.py
+msgid "Saved. Restart the download service for this to take effect."
+msgstr "Opgeslagen. Herstart de downloadservice om dit toe te passen."
+
+#: cps/spa_strings.py
+msgid "Search in"
+msgstr "Zoeken in"
+
+#: cps/spa_strings.py
+msgid "Searching download sources… this can take up to a minute."
+msgstr "Downloadbronnen doorzoeken… dit kan tot een minuut duren."
+
+#: cps/spa_strings.py
+msgid "See all your requests"
+msgstr "Al je aanvragen bekijken"
+
+#: cps/spa_strings.py
+msgid "Set by the server environment."
+msgstr "Ingesteld door de serveromgeving."
+
+#: cps/spa_strings.py
+msgid "Set up downloads"
+msgstr "Downloads instellen"
+
+#: cps/spa_strings.py
+msgid "Settings sections"
+msgstr "Instellingsonderdelen"
+
+#: cps/spa_strings.py
+msgid "Some sources could not be searched"
+msgstr "Sommige bronnen konden niet worden doorzocht"
+
+#: cps/spa_strings.py
+msgid "Sources and search"
+msgstr "Bronnen en zoeken"
+
+#: cps/spa_strings.py
+msgid "That choice expired. Search again and pick the file again."
+msgstr "Die keuze is verlopen. Zoek opnieuw en kies het bestand opnieuw."
+
+#: cps/spa_strings.py
+msgid "That did not work."
+msgstr "Dat is niet gelukt."
+
+#: cps/spa_strings.py
+msgid "That result expired. Search again."
+msgstr "Dat resultaat is verlopen. Zoek opnieuw."
+
+#: cps/spa_strings.py
+msgid "The download could not be started."
+msgstr "De download kon niet worden gestart."
+
+#: cps/spa_strings.py
+msgid "The download service could not be connected."
+msgstr "De downloadservice kon niet worden gekoppeld."
+
+#: cps/spa_strings.py
+msgid "The download service could not be searched."
+msgstr "De downloadservice kon niet worden doorzocht."
+
+#: cps/spa_strings.py
+msgid "The download service did not answer at that address."
+msgstr "De downloadservice antwoordde niet op dat adres."
+
+#: cps/spa_strings.py
+msgid "The download service finds books outside your library. Search, then pick a file, and the book is downloaded and imported here. It runs privately beside this server and is managed only from this page."
+msgstr "De downloadservice vindt boeken buiten je bibliotheek. Zoek, kies een bestand, en het boek wordt gedownload en hier geïmporteerd. Hij draait privé naast deze server en wordt alleen vanaf deze pagina beheerd."
+
+#: cps/spa_strings.py
+msgid "The download service is busy. Try again in a moment."
+msgstr "De downloadservice is bezig. Probeer het zo opnieuw."
+
+#: cps/spa_strings.py
+msgid "The download service is connected but switched off in Book sources."
+msgstr "De downloadservice is gekoppeld maar staat uit in Boekbronnen."
+
+#: cps/spa_strings.py
+msgid "The download service is not connected properly. Ask an administrator to check Downloads."
+msgstr "De downloadservice is niet goed gekoppeld. Vraag een beheerder Downloads te controleren."
+
+#: cps/spa_strings.py
+msgid "The download service is not responding at {endpoint}."
+msgstr "De downloadservice reageert niet op {endpoint}."
+
+#: cps/spa_strings.py
+msgid "The download service is not responding. Try again in a moment."
+msgstr "De downloadservice reageert niet. Probeer het zo opnieuw."
+
+#: cps/spa_strings.py
+msgid "The download service rejected the API key. Check SHELFMARK_API_KEY matches on both containers."
+msgstr "De downloadservice heeft de API-sleutel geweigerd. Controleer of SHELFMARK_API_KEY in beide containers gelijk is."
+
+#: cps/spa_strings.py
+msgid "The download service rejected the stored API key."
+msgstr "De downloadservice heeft de opgeslagen API-sleutel geweigerd."
+
+#: cps/spa_strings.py
+msgid "The download service settings could not be loaded."
+msgstr "De instellingen van de downloadservice konden niet worden geladen."
+
+#: cps/spa_strings.py
+msgid "The download service status could not be loaded."
+msgstr "De status van de downloadservice kon niet worden geladen."
+
+#: cps/spa_strings.py
+msgid "The settings were not saved."
+msgstr "De instellingen zijn niet opgeslagen."
+
+#: cps/spa_strings.py
+msgid "This account cannot request books, or requests are switched off."
+msgstr "Dit account kan geen boeken aanvragen, of aanvragen staan uit."
+
+#: cps/spa_strings.py
+msgid "Use the server settings"
+msgstr "Serverinstellingen gebruiken"
+
+#: cps/spa_strings.py
+msgid "Working…"
+msgstr "Bezig…"
+
+#: cps/spa_strings.py
+msgid "{series} #{position}"
+msgstr "{series} #{position}"

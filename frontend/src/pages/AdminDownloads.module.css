@@ -1,0 +1,38 @@
+.setup { display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-3); }
+.fields { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.field { display: flex; flex-direction: column; gap: var(--sp-1); flex: 1; min-width: 220px; font-size: var(--fs-sm); }
+.field > span { color: var(--text-muted); }
+.field > input {
+  min-height: 40px; padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border); border-radius: var(--r-md);
+  background: var(--surface-3); color: var(--text); font: inherit; font-size: var(--fs-sm);
+}
+.buttons { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+
+.primary, .secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-1);
+  min-height: 40px; padding: 0 var(--sp-3);
+  border-radius: var(--r-md); font-size: var(--fs-sm); font-weight: var(--fw-medium);
+  cursor: pointer; white-space: nowrap;
+}
+.primary { border: 1px solid transparent; background: var(--accent); color: var(--on-accent); }
+.secondary { border: 1px solid var(--border); background: var(--surface-1); color: var(--text); }
+.primary:disabled, .secondary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.link { display: inline-block; margin-top: var(--sp-2); color: var(--accent-text); font-size: var(--fs-sm); text-decoration: underline; }
+
+.settings { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: var(--sp-4); }
+.tabs { display: flex; flex-direction: column; gap: 2px; }
+.tab {
+  padding: var(--sp-2) var(--sp-3); border: 0; border-radius: var(--r-md);
+  background: transparent; color: var(--text-muted); font: inherit; font-size: var(--fs-sm); text-align: left; cursor: pointer;
+}
+.tab:hover { background: var(--surface-2); color: var(--text); }
+.tab[aria-current='true'] { background: var(--accent-soft); color: var(--accent-text); font-weight: var(--fw-medium); }
+.panel { min-width: 0; }
+.panelTitle { margin: 0 0 var(--sp-3); font-size: var(--fs-md); font-family: var(--font-display); }
+
+@media (max-width: 720px) {
+  .settings { grid-template-columns: 1fr; }
+  .tabs { flex-direction: row; flex-wrap: wrap; }
+}

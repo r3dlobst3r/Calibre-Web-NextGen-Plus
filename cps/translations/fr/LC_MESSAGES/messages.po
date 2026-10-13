@@ -21042,3 +21042,323 @@ msgstr "Afficher la section Lu / Non lu"
 
 #~ msgid "Calibre library rating (1-10)"
 #~ msgstr "Note de la bibliothèque Calibre (1–10)"
+
+#: cps/spa_strings.py
+msgid "Address"
+msgstr "Adresse"
+
+#: cps/spa_strings.py
+msgid "An administrator needs to connect the download service before books can be found here."
+msgstr "Un administrateur doit connecter le service de téléchargement avant de pouvoir trouver des livres ici."
+
+#: cps/spa_strings.py
+msgid "Book sources need an administrator review first. Open Book sources."
+msgstr "Les sources de livres doivent d’abord être vérifiées par un administrateur. Ouvrez Sources de livres."
+
+#: cps/spa_strings.py
+msgid "Books found outside your library for \"{q}\". Pick a file and it is downloaded and imported into this library."
+msgstr "Livres trouvés hors de votre bibliothèque pour « {q} ». Choisissez un fichier : il est téléchargé puis importé dans cette bibliothèque."
+
+#: cps/spa_strings.py
+msgid "Books to download"
+msgstr "Livres à télécharger"
+
+#: cps/spa_strings.py
+msgid "Check the address (http://host:port) and the API key."
+msgstr "Vérifiez l’adresse (http://hôte:port) et la clé API."
+
+#: cps/spa_strings.py
+msgid "Choose…"
+msgstr "Choisir…"
+
+#: cps/spa_strings.py
+msgid "Connect"
+msgstr "Connecter"
+
+#: cps/spa_strings.py
+msgid "Connected to {endpoint}."
+msgstr "Connecté à {endpoint}."
+
+#: cps/spa_strings.py
+msgid "Connected."
+msgstr "Connecté."
+
+#: cps/spa_strings.py
+msgid "Connected. Open Library was switched on so books can be searched."
+msgstr "Connecté. Open Library a été activé pour permettre la recherche de livres."
+
+#: cps/spa_strings.py
+msgid "Connecting…"
+msgstr "Connexion…"
+
+#: cps/spa_strings.py
+msgid "Discard changes"
+msgstr "Annuler les modifications"
+
+#: cps/spa_strings.py
+msgid "Done."
+msgstr "Terminé."
+
+#: cps/spa_strings.py
+msgid "Download service"
+msgstr "Service de téléchargement"
+
+#: cps/spa_strings.py
+msgid "Downloading {title}."
+msgstr "Téléchargement de {title}."
+
+#: cps/spa_strings.py
+msgid "Downloads are not available"
+msgstr "Les téléchargements ne sont pas disponibles"
+
+#: cps/spa_strings.py
+msgid "Downloads are not set up"
+msgstr "Les téléchargements ne sont pas configurés"
+
+#: cps/spa_strings.py
+msgid "Downloads are paused right now. Ask an administrator to check Downloads."
+msgstr "Les téléchargements sont en pause. Demandez à un administrateur de vérifier Téléchargements."
+
+#: cps/spa_strings.py
+msgid "Downloads are paused:"
+msgstr "Les téléchargements sont en pause :"
+
+#: cps/spa_strings.py
+msgid "Downloads for {title}"
+msgstr "Téléchargements pour {title}"
+
+#: cps/spa_strings.py
+msgid "Enter a shorter search."
+msgstr "Saisissez une recherche plus courte."
+
+#: cps/spa_strings.py
+msgid "Enter address and key"
+msgstr "Saisir l’adresse et la clé"
+
+#: cps/spa_strings.py
+msgid "File"
+msgstr "Fichier"
+
+#: cps/spa_strings.py
+msgid "Find downloads"
+msgstr "Trouver des téléchargements"
+
+#: cps/spa_strings.py
+msgid "Format not supported"
+msgstr "Format non pris en charge"
+
+#: cps/spa_strings.py
+msgid "Get more books"
+msgstr "Trouver d’autres livres"
+
+#: cps/spa_strings.py
+msgid "Hide downloads"
+msgstr "Masquer les téléchargements"
+
+#: cps/spa_strings.py
+msgid "Look for \"{query}\" to download"
+msgstr "Chercher « {query} » à télécharger"
+
+#: cps/spa_strings.py
+msgid "Manage in Downloads"
+msgstr "Gérer dans Téléchargements"
+
+#: cps/spa_strings.py
+msgid "More results"
+msgstr "Plus de résultats"
+
+#: cps/spa_strings.py
+msgid "Move {item} down"
+msgstr "Descendre {item}"
+
+#: cps/spa_strings.py
+msgid "Move {item} up"
+msgstr "Monter {item}"
+
+#: cps/spa_strings.py
+msgid "No address or API key is set. Set SHELFMARK_URL and SHELFMARK_API_KEY, or enter them below."
+msgstr "Aucune adresse ni clé API n’est définie. Définissez SHELFMARK_URL et SHELFMARK_API_KEY, ou saisissez-les ci-dessous."
+
+#: cps/spa_strings.py
+msgid "No books found for \"{q}\"."
+msgstr "Aucun livre trouvé pour « {q} »."
+
+#: cps/spa_strings.py
+msgid "No downloads were found for this book."
+msgstr "Aucun téléchargement trouvé pour ce livre."
+
+#: cps/spa_strings.py
+msgid "Not available with the current settings."
+msgstr "Indisponible avec les paramètres actuels."
+
+#: cps/spa_strings.py
+msgid "Not set up. Set SHELFMARK_URL and SHELFMARK_API_KEY for this server, or enter them below."
+msgstr "Non configuré. Définissez SHELFMARK_URL et SHELFMARK_API_KEY pour ce serveur, ou saisissez-les ci-dessous."
+
+#: cps/spa_strings.py
+msgid "Nothing added yet."
+msgstr "Rien d’ajouté pour l’instant."
+
+#: cps/spa_strings.py
+msgid "Nothing to set here right now."
+msgstr "Rien à régler ici pour le moment."
+
+#: cps/spa_strings.py
+msgid "One per line"
+msgstr "Un par ligne"
+
+#: cps/spa_strings.py
+msgid "Open Book sources"
+msgstr "Ouvrir Sources de livres"
+
+#: cps/spa_strings.py
+msgid "Ready to connect to {endpoint}."
+msgstr "Prêt à se connecter à {endpoint}."
+
+#: cps/spa_strings.py
+msgid "Reconnect"
+msgstr "Reconnecter"
+
+#: cps/spa_strings.py
+msgid "Remove row {number}"
+msgstr "Supprimer la ligne {number}"
+
+#: cps/spa_strings.py
+msgid "Request"
+msgstr "Demander"
+
+#: cps/spa_strings.py
+msgid "Requests are switched off, so nobody can download yet. Turn them on and choose who may download in Book sources."
+msgstr "Les demandes sont désactivées : personne ne peut encore télécharger. Activez-les et choisissez qui peut télécharger dans Sources de livres."
+
+#: cps/spa_strings.py
+msgid "Restart needed"
+msgstr "Redémarrage requis"
+
+#: cps/spa_strings.py
+msgid "Saved. Leave blank to keep it."
+msgstr "Enregistré. Laissez vide pour le conserver."
+
+#: cps/spa_strings.py
+msgid "Saved. Restart the download service for this to take effect."
+msgstr "Enregistré. Redémarrez le service de téléchargement pour appliquer ce changement."
+
+#: cps/spa_strings.py
+msgid "Search in"
+msgstr "Rechercher dans"
+
+#: cps/spa_strings.py
+msgid "Searching download sources… this can take up to a minute."
+msgstr "Recherche dans les sources de téléchargement… cela peut prendre jusqu’à une minute."
+
+#: cps/spa_strings.py
+msgid "See all your requests"
+msgstr "Voir toutes vos demandes"
+
+#: cps/spa_strings.py
+msgid "Set by the server environment."
+msgstr "Défini par l’environnement du serveur."
+
+#: cps/spa_strings.py
+msgid "Set up downloads"
+msgstr "Configurer les téléchargements"
+
+#: cps/spa_strings.py
+msgid "Settings sections"
+msgstr "Sections des paramètres"
+
+#: cps/spa_strings.py
+msgid "Some sources could not be searched"
+msgstr "Certaines sources n’ont pas pu être interrogées"
+
+#: cps/spa_strings.py
+msgid "Sources and search"
+msgstr "Sources et recherche"
+
+#: cps/spa_strings.py
+msgid "That choice expired. Search again and pick the file again."
+msgstr "Ce choix a expiré. Relancez la recherche et choisissez de nouveau le fichier."
+
+#: cps/spa_strings.py
+msgid "That did not work."
+msgstr "Cela n’a pas fonctionné."
+
+#: cps/spa_strings.py
+msgid "That result expired. Search again."
+msgstr "Ce résultat a expiré. Relancez la recherche."
+
+#: cps/spa_strings.py
+msgid "The download could not be started."
+msgstr "Le téléchargement n’a pas pu démarrer."
+
+#: cps/spa_strings.py
+msgid "The download service could not be connected."
+msgstr "Le service de téléchargement n’a pas pu être connecté."
+
+#: cps/spa_strings.py
+msgid "The download service could not be searched."
+msgstr "La recherche dans le service de téléchargement a échoué."
+
+#: cps/spa_strings.py
+msgid "The download service did not answer at that address."
+msgstr "Le service de téléchargement n’a pas répondu à cette adresse."
+
+#: cps/spa_strings.py
+msgid "The download service finds books outside your library. Search, then pick a file, and the book is downloaded and imported here. It runs privately beside this server and is managed only from this page."
+msgstr "Le service de téléchargement trouve des livres hors de votre bibliothèque. Recherchez, choisissez un fichier, et le livre est téléchargé puis importé ici. Il fonctionne en privé à côté de ce serveur et se gère uniquement depuis cette page."
+
+#: cps/spa_strings.py
+msgid "The download service is busy. Try again in a moment."
+msgstr "Le service de téléchargement est occupé. Réessayez dans un instant."
+
+#: cps/spa_strings.py
+msgid "The download service is connected but switched off in Book sources."
+msgstr "Le service de téléchargement est connecté mais désactivé dans Sources de livres."
+
+#: cps/spa_strings.py
+msgid "The download service is not connected properly. Ask an administrator to check Downloads."
+msgstr "Le service de téléchargement n’est pas correctement connecté. Demandez à un administrateur de vérifier Téléchargements."
+
+#: cps/spa_strings.py
+msgid "The download service is not responding at {endpoint}."
+msgstr "Le service de téléchargement ne répond pas à {endpoint}."
+
+#: cps/spa_strings.py
+msgid "The download service is not responding. Try again in a moment."
+msgstr "Le service de téléchargement ne répond pas. Réessayez dans un instant."
+
+#: cps/spa_strings.py
+msgid "The download service rejected the API key. Check SHELFMARK_API_KEY matches on both containers."
+msgstr "Le service de téléchargement a refusé la clé API. Vérifiez que SHELFMARK_API_KEY est identique dans les deux conteneurs."
+
+#: cps/spa_strings.py
+msgid "The download service rejected the stored API key."
+msgstr "Le service de téléchargement a refusé la clé API enregistrée."
+
+#: cps/spa_strings.py
+msgid "The download service settings could not be loaded."
+msgstr "Les paramètres du service de téléchargement n’ont pas pu être chargés."
+
+#: cps/spa_strings.py
+msgid "The download service status could not be loaded."
+msgstr "L’état du service de téléchargement n’a pas pu être chargé."
+
+#: cps/spa_strings.py
+msgid "The settings were not saved."
+msgstr "Les paramètres n’ont pas été enregistrés."
+
+#: cps/spa_strings.py
+msgid "This account cannot request books, or requests are switched off."
+msgstr "Ce compte ne peut pas demander de livres, ou les demandes sont désactivées."
+
+#: cps/spa_strings.py
+msgid "Use the server settings"
+msgstr "Utiliser les paramètres du serveur"
+
+#: cps/spa_strings.py
+msgid "Working…"
+msgstr "En cours…"
+
+#: cps/spa_strings.py
+msgid "{series} #{position}"
+msgstr "{series} nº {position}"

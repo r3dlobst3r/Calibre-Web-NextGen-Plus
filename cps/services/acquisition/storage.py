@@ -583,6 +583,24 @@ class Repository(BundleChoicesMixin):
             if result.rowcount != 1:
                 raise Conflict("Job changed; refresh its status")
 
+    def job_offer(self, owner_id, job_id):
+        """Private offer behind one of this owner's jobs; the caller must not serialize it.
+
+        Durable jobs keep their offer past its selection expiry, so this still answers
+        after the browsing session that created the request has ended.
+        """
+        jobs, offers = self.tables.jobs, self.tables.offers
+        with self.engine.connect() as conn:
+            row = conn.execute(select(jobs.c.offer_id).where(jobs.c.id == job_id,
+                jobs.c.owner_id == _user(owner_id))).first()
+            offer = row and conn.execute(select(offers).where(offers.c.id == row[0],
+                offers.c.owner_id == _user(owner_id))).mappings().first()
+            if not offer:
+                raise NotFound("Job is unavailable")
+            scope = f"user:{owner_id}:connection:{offer['connection_id']}:revision:{offer['connection_revision']}"
+            return json.loads(self.box.open(_sealed(offer, "payload"), scope=scope,
+                identity=offer["id"], field_name="offer"))
+
     def retry(self, owner_id, job_id):
         table = self.tables.jobs
         with self.engine.begin() as conn:

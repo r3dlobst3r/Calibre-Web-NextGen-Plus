@@ -26,6 +26,7 @@ import { Upload } from './pages/Upload';
 import { Admin } from './pages/Admin';
 import { AdminDevices } from './pages/AdminDevices';
 import { AdminAcquisition } from './pages/AdminAcquisition';
+import { AdminDownloads } from './pages/AdminDownloads';
 import { FindBooks } from './pages/FindBooks';
 import { About } from './pages/About';
 import { Tasks } from './pages/Tasks';
@@ -38,9 +39,13 @@ import { MagicShelf } from './pages/MagicShelf';
 import { MagicShelfView } from './pages/MagicShelfView';
 import { GlobalLibrary } from './pages/GlobalLibrary';
 import { AppShell } from './components/AppShell';
+import { GetMoreBooks, useDownloadService } from './components/GetMoreBooks';
+import { SearchScopeTabs } from './components/SearchScopeTabs';
+import searchScopeStyles from './components/SearchScopeTabs.module.css';
 import { RoutedErrorBoundary } from './components/ErrorBoundary';
 import { SpinnerCentered } from './components/Spinner';
-import { I18nProvider } from './lib/i18n';
+import { I18nProvider, useT } from './lib/i18n';
+import { searchQueryFromQuery, searchScopeFromQuery } from './lib/searchScope';
 import { usePostAuthRedirect } from './lib/authRedirect';
 import { AUTH_ROUTES, SPA_ROUTES } from './lib/routes';
 import { recordOrigin } from './lib/backLink';
@@ -97,12 +102,36 @@ function LibraryLanding({
   isGuest: boolean;
   defaultFilter?: AdvancedSearchParams;
 }) {
+  const t = useT();
   const search = useSearch();
+  const { data: me } = useMe();
   const hasPostAuthDestination = !!new URLSearchParams(search).get('next');
+  // A search can also look outside the library when this account may request
+  // books and an administrator has connected the download service.
+  const query = searchQueryFromQuery(search);
+  const mayGet = !isGuest && !!me?.acquisition_access && !!query;
+  const service = useDownloadService(mayGet);
   if (hasPostAuthDestination) {
     return isGuest ? <Login /> : <AuthenticatedAuthLanding />;
   }
-  return <Library defaultFilter={defaultFilter} />;
+  const scope = searchScopeFromQuery(search);
+  if (!mayGet || (!service.connection && scope !== 'get')) {
+    return <Library defaultFilter={defaultFilter} />;
+  }
+  return (
+    <>
+      {service.connection && <SearchScopeTabs />}
+      {scope === 'get' ? (
+        <main className={searchScopeStyles.getMore} data-testid="get-more-books">
+          <h1 className={searchScopeStyles.getMoreHeading} tabIndex={-1}>{t('Get more books')}</h1>
+          <p className={searchScopeStyles.getMoreLede}>
+            {t('Books found outside your library for "{q}". Pick a file and it is downloaded and imported into this library.', { q: query })}
+          </p>
+          <GetMoreBooks query={query} />
+        </main>
+      ) : <Library defaultFilter={defaultFilter} />}
+    </>
+  );
 }
 
 export function App() {
@@ -287,6 +316,9 @@ export function App() {
           {/* Admin */}
           <Route path={SPA_ROUTES.adminDevices}>
             {() => me.role?.admin ? <AdminDevices /> : <NotFound />}
+          </Route>
+          <Route path={SPA_ROUTES.adminDownloads}>
+            {() => me.role?.admin ? <AdminDownloads /> : <NotFound />}
           </Route>
           <Route path={SPA_ROUTES.adminAcquisition}>
             {() => me.role?.admin ? <AdminAcquisition /> : <NotFound />}

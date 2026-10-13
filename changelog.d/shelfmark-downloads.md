@@ -1,0 +1,3 @@
+### Added
+
+- **Search can find books outside your library and download them.** When Shelfmark is connected as a download service, a library search gets a second tab, **Get more books**. It shows matching books, marks the ones already in the library, and lists each book's downloadable files. A request runs through the normal book-source rules (access, approval, formats, cancel and retry), and the file is imported through ingest and credited to the account that asked. Shelfmark runs privately beside CWNG with no port of its own. **Administration → Downloads** connects it and manages its sources and search settings. See `docs/shelfmark-downloads.md` and `docker-compose.shelfmark.yml`.

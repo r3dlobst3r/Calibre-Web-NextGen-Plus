@@ -1,0 +1,68 @@
+# Calibre-Web-NextGen with the Shelfmark download service running hidden beside it.
+#
+# Shelfmark has NO published port: only CWNG can reach it, over the private
+# network compose creates for these two services. Everything about it — sources,
+# search providers, the Cloudflare bypass — is managed in CWNG under
+# Administration → Downloads. See docs/shelfmark-downloads.md.
+#
+# 1. Copy the example below into a file named `.env` next to this one and
+#    fill it in. SHELFMARK_API_KEY is any long random string, e.g. the output of
+#    `openssl rand -hex 32`; both containers read the same value.
+#
+#      DATA_DIR=/path/to/calibre-web-data
+#      SHELFMARK_API_KEY=change-me-to-a-long-random-string
+#      PUID=1000
+#      PGID=1000
+#      TZ=UTC
+#
+# 2. docker compose -f docker-compose.shelfmark.yml up -d --build
+# 3. Open CWNG, then Administration → Downloads → Connect.
+
+services:
+  calibre-web:
+    # Built from this checkout: the download-service integration lives here.
+    build: .
+    image: calibre-web-nextgen:shelfmark
+    container_name: calibre-web-nextgen
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-UTC}
+      # Where CWNG finds the download service, and the key both sides share.
+      - SHELFMARK_URL=http://shelfmark:8084
+      - SHELFMARK_API_KEY=${SHELFMARK_API_KEY:?Set SHELFMARK_API_KEY in .env}
+    volumes:
+      - ${DATA_DIR:?Set DATA_DIR in .env}/config:/config
+      - ${DATA_DIR}/ingest:/cwa-book-ingest
+      - ${DATA_DIR}/library:/calibre-library
+    ports:
+      - 8083:8083
+    depends_on:
+      - shelfmark
+    restart: unless-stopped
+
+  shelfmark:
+    # The full image includes the Cloudflare bypass that some sources need.
+    build:
+      context: ../shelfmark
+      target: shelfmark
+    image: shelfmark:cwng
+    container_name: shelfmark
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-UTC}
+      # Requests carrying this key are Shelfmark's administrator. Local sign-in
+      # (not "none") is what makes Shelfmark require it at all.
+      - SHELFMARK_API_KEY=${SHELFMARK_API_KEY:?Set SHELFMARK_API_KEY in .env}
+      - AUTH_METHOD=builtin
+    volumes:
+      - ${DATA_DIR}/shelfmark/config:/config
+      # Shelfmark's own download folder. CWNG copies each finished book out of
+      # it over the API and asks Shelfmark to delete it, so this stays small.
+      # It is deliberately NOT the CWNG ingest folder.
+      - ${DATA_DIR}/shelfmark/downloads:/books
+    # No `ports:` on purpose. Uncomment only to debug Shelfmark directly.
+    # ports:
+    #   - 8084:8084
+    restart: unless-stopped

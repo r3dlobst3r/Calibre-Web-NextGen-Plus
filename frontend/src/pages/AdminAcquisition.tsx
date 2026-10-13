@@ -468,10 +468,15 @@ export function AdminAcquisition() {
                     )}
                   </div>
                   <div className={styles.connectionActions}>
-                    <button type="button" className={styles.secondary}
-                      aria-label={t('Edit {name}', { name: connection.label })}
-                      disabled={loadConnection.isPending}
-                      onClick={() => loadConnection.mutate(connection.id)}>{t('Edit')}</button>
+                    {connection.adapter === 'shelfmark' ? (
+                      // Its address, key and source settings have their own page.
+                      <Link href="/admin/downloads" className={styles.secondary}>{t('Manage in Downloads')}</Link>
+                    ) : (
+                      <button type="button" className={styles.secondary}
+                        aria-label={t('Edit {name}', { name: connection.label })}
+                        disabled={loadConnection.isPending}
+                        onClick={() => loadConnection.mutate(connection.id)}>{t('Edit')}</button>
+                    )}
                     <button type="button" className={styles.secondary}
                       aria-label={t('Delete {name}', { name: connection.label })}
                       onClick={() => setDeleting(connection.id)}>{t('Delete')}</button>
