@@ -912,10 +912,18 @@ handle_event() {
                 if [ ! -f "$filepath" ]; then
                         return 0
                 fi
-                local _nlink _size
+                local _nlink _size _published=0
                 _nlink=$(stat -c %h "$filepath" 2>/dev/null || stat -f %l "$filepath" 2>/dev/null || echo 1)
                 _size=$(stat -c %s "$filepath" 2>/dev/null || stat -f %z "$filepath" 2>/dev/null || echo 0)
-                if [ "${_nlink:-1}" -le 1 ] || [ "${_size:-0}" -le 0 ]; then
+                # A book-source publication writes its sidecar first and then
+                # links the finished book into place. Its private link is removed
+                # straight after, so by the time this runs nlink can already be 1
+                # -- but the CREATE is still the complete file, and no close_write
+                # will ever follow it.
+                if [[ "$filename" == cwng-acquisition-* ]] && [ -f "${filepath}.cwa.json" ]; then
+                        _published=1
+                fi
+                if [ "$_published" -eq 0 ] && { [ "${_nlink:-1}" -le 1 ] || [ "${_size:-0}" -le 0 ]; }; then
                         # Ordinary new/empty file or in-progress download --
                         # wait for close_write instead of ingesting now.
                         return 0
