@@ -119,6 +119,22 @@ dependencies = [
     # Kobo integration
     "jsonschema>=3.2.0,<4.24.0",
     "curl-cffi>=0.6.0,<0.7.0",
+
+    # Downloads: Shelfmark's engine, vendored in cps/services/downloads/engine
+    # (Anna's Archive, LibGen, AudiobookBay, download and debrid clients).
+    "PySocks>=1.7.1,<2.0",
+    "defusedxml>=0.7.1,<0.8",
+    "dnspython>=2.6.0,<3.0",
+    "tqdm>=4.66.0,<5.0",
+    "emoji>=2.10.0,<3.0",
+    "psutil>=5.9.0,<8.0",
+    "qbittorrent-api>=2026.8.1",
+    "transmission-rpc>=7.0.0,<8.0",
+    "httpx[http2]>=0.28.1,<0.29",
+    "publicsuffixlist>=1.0.2",
+    # The built-in Cloudflare bypass (SeleniumBase driving Chromium) is installed
+    # separately by requirements-bypass.txt: SeleniumBase pins exact versions of
+    # requests, rich and beautifulsoup4 that CWNG's own pins cannot share.
 ]
 dynamic = ["version"]
 
