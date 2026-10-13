@@ -3,7 +3,7 @@
 Calibre-Web-NextGen ships as a single Docker image:
 
 ```
-ghcr.io/new-usemame/calibre-web-nextgen:latest
+ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
 ```
 
 It's a drop-in for the standard Calibre-Web-Automated (CWA) image. **Switching keeps

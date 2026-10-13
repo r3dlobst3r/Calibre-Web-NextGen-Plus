@@ -31,7 +31,7 @@ In your existing `docker-compose.yml`, change only the image line:
 
 ```diff
 - image: crocodilestick/calibre-web-automated:latest
-+ image: ghcr.io/new-usemame/calibre-web-nextgen:latest
++ image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
 ```
 
 Keep the same `volumes` (so `/config` and `/calibre-library` point at your existing data),

@@ -17,7 +17,7 @@ container — not in the image — so switching keeps everything and is reversib
    ```yaml
    services:
      calibre-web-nextgen:
-       image: ghcr.io/new-usemame/calibre-web-nextgen:latest
+       image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
        container_name: calibre-web-nextgen
        environment:
          - PUID=1000
@@ -39,7 +39,7 @@ container — not in the image — so switching keeps everything and is reversib
 ## Switching from CWA
 
 - **If your CWA runs as a Stack:** open that stack → **Editor**, change the image line to
-  `ghcr.io/new-usemame/calibre-web-nextgen:latest`, keep the same volume binds, then
+  `ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest`, keep the same volume binds, then
   **Update the stack** with **Re-pull image and redeploy** ticked.
 - **If your CWA runs as a standalone container:** the tidiest switch is to recreate it as the
   stack above, pointing the three volumes at the **same host folders** CWA already uses

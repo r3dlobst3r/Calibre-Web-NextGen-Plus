@@ -16,7 +16,7 @@ If you already run CWA on Unraid, you only need to change the image it uses:
 1. **Docker** tab → click your existing Calibre-Web-Automated container → **Edit**.
 2. Set **Repository** to:
    ```
-   ghcr.io/new-usemame/calibre-web-nextgen:latest
+   ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
    ```
 3. Leave every **Path** mapping as-is — `/config`, `/calibre-library`, `/cwa-book-ingest`
    should keep pointing at the same `/mnt/user/...` shares you already use. Leave `PUID`/`PGID`
@@ -33,7 +33,7 @@ If you already run CWA on Unraid, you only need to change the image it uses:
 1. **Docker** tab → **Add Container**.
 2. Fill in:
    - **Name:** `calibre-web-nextgen`
-   - **Repository:** `ghcr.io/new-usemame/calibre-web-nextgen:latest`
+   - **Repository:** `ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest`
    - **Network Type:** `bridge`
    - **Port:** add a Port mapping — Container Port `8083` → a Host Port of your choice (e.g. `8083`).
    - **Path** mappings (add three):

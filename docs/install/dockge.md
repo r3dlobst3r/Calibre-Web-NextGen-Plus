@@ -19,7 +19,7 @@ into the container — not in the image — so switching keeps everything and is
    ```yaml
    services:
      calibre-web-nextgen:
-       image: ghcr.io/new-usemame/calibre-web-nextgen:latest
+       image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
        container_name: calibre-web-nextgen
        environment:
          - PUID=1000
@@ -41,7 +41,7 @@ into the container — not in the image — so switching keeps everything and is
 ## Switching from CWA
 
 - **If your CWA already runs as a Dockge stack:** open that stack, change the image line to
-  `ghcr.io/new-usemame/calibre-web-nextgen:latest`, keep the same volume binds, then
+  `ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest`, keep the same volume binds, then
   **Deploy** (Dockge re-pulls and recreates).
 - **If your CWA runs outside Dockge** (a plain `docker run`, another compose file, or another
   GUI): create the stack above, but point the three volumes at the **same host folders** CWA
@@ -53,7 +53,7 @@ into the container — not in the image — so switching keeps everything and is
 1. Open your `calibre-web-nextgen` stack in Dockge.
 2. Click the stack's **update** control — Dockge shows an update indicator when a newer image
    is available; use it, or just click **Deploy** again to re-pull and recreate. Dockge pulls
-   the newest `ghcr.io/new-usemame/calibre-web-nextgen:latest` and recreates the container with
+   the newest `ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest` and recreates the container with
    your data intact.
 
    *(A plain restart does not pull a new image — you have to re-pull, which Deploy does.)*

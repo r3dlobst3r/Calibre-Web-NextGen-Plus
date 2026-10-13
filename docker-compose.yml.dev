@@ -4,7 +4,7 @@ services:
     # Development image, rebuilt from main on every merge to this repo.
     # See CONTRIBUTING.md; use build.sh if you want an image from your working tree.
     # The container name differs from the production one so both can run side by side.
-    image: ghcr.io/new-usemame/calibre-web-nextgen:dev
+    image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:dev
     container_name: calibre-web-nextgen-dev
     environment:
       # Only change these if you know what you're doing

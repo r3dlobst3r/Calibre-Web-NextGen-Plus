@@ -71,7 +71,7 @@ with spaces):
 ```yaml
 services:
   calibre-web:
-    image: ghcr.io/new-usemame/calibre-web-nextgen:latest
+    image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
     container_name: calibre-web
     environment:
       - PUID=1000            # match the human's uid on Linux/NAS

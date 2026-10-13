@@ -1,12 +1,17 @@
 # Calibre-Web NextGen+
 
-**Calibre-Web NextGen+** is [Calibre-Web NextGen](https://github.com/new-usemame/Calibre-Web-NextGen) with a built-in book downloader. Search your library as usual; if the book isn't there, switch to **Get more books** and download it straight into the library: ebooks from Anna's Archive and LibGen, audiobooks from AudiobookBay, through your own torrent or debrid client where one is needed.
+[![Container](https://img.shields.io/badge/ghcr.io-calibre--web--nextgen--plus-blue?logo=docker)](https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/pkgs/container/calibre-web-nextgen-plus)
+[![Open issues](https://img.shields.io/github/issues/r3dlobst3r/Calibre-Web-NextGen-Plus)](https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/issues)
 
-- **One app.** The downloader runs inside the server. There is no second container and nothing extra to expose.
+**Calibre-Web NextGen+** is [Calibre-Web NextGen](https://github.com/new-usemame/Calibre-Web-NextGen) with a built-in book downloader. Search your library as usual; if the book isn't there, switch to **Get more books** and download it straight into the library: ebooks from Anna's Archive and LibGen, audiobooks from AudiobookBay through your own torrent or debrid client.
+
+- **One app.** The downloader runs inside the server: no second container, nothing extra to expose.
 - **Your rules.** Who may download, who needs approval and which formats are allowed are the existing *Book sources* settings. Every download is imported through ingest and credited to the person who asked for it.
 - **Configured in the app.** *Administration → Downloads* switches it on and sets up sources, mirrors, download and debrid clients, and the built-in Cloudflare bypass.
 
-The downloader is [Shelfmark](https://github.com/calibrain/shelfmark)'s download engine (MIT), vendored into this project. See **[Downloads](docs/downloads.md)** for how it works and how to set it up.
+Everything else is Calibre-Web NextGen, unchanged: the library, reader, Kobo and KOReader sync, OPDS and automatic ingest documented below.
+
+## Install
 
 ```yaml
 services:
@@ -26,7 +31,30 @@ services:
     restart: unless-stopped
 ```
 
-Everything below is the upstream Calibre-Web NextGen documentation, which applies unchanged; replace its image name with the one above.
+```bash
+docker compose pull && docker compose up -d
+```
+
+The image runs on amd64 and arm64. It is about 0.8 GB larger than Calibre-Web NextGen because it carries the Chromium used by the Cloudflare bypass.
+
+**Already running Calibre-Web Automated or Calibre-Web NextGen?** Change the image line and keep your volumes; the library, settings, users and sync state carry over:
+
+```diff
+- image: crocodilestick/calibre-web-automated:latest   # or ghcr.io/new-usemame/calibre-web-nextgen:latest
++ image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
+```
+
+Then open **Administration → Book sources** to allow requests and choose who may download, and **Administration → Downloads** to switch the downloader on and pick its sources. [Downloads](docs/downloads.md) walks through it.
+
+Step-by-step guides for NAS and GUI setups: **[Synology](docs/install/synology.md) · [Unraid](docs/install/unraid.md) · [Portainer](docs/install/portainer.md) · [TrueNAS SCALE](docs/install/truenas.md) · [all guides](docs/install/)**.
+
+- **Bug or idea?** [Open an issue.](https://github.com/r3dlobst3r/Calibre-Web-NextGen-Plus/issues)
+- **Setting up with an AI assistant?** Point it at [`AI_README.md`](AI_README.md).
+
+## Credits
+
+- [Calibre-Web NextGen](https://github.com/new-usemame/Calibre-Web-NextGen), which this is built on, and the projects before it (Calibre-Web Automated, Calibre-Web). The documentation below is theirs. Please file problems that also occur in Calibre-Web NextGen there, and consider [sponsoring its maintainer](https://github.com/sponsors/new-usemame).
+- [Shelfmark](https://github.com/calibrain/shelfmark) (MIT), whose download engine powers the downloader. It is vendored into `cps/services/downloader/engine` by `scripts/sync_shelfmark_engine.py`.
 
 ---
 
@@ -34,36 +62,9 @@ Everything below is the upstream Calibre-Web NextGen documentation, which applie
   <img src="README_images/calibre-web-nextgen-banner.png" alt="Calibre-Web NextGen" width="520">
 </p>
 
-[![Latest release](https://img.shields.io/github/v/release/new-usemame/Calibre-Web-NextGen)](https://github.com/new-usemame/Calibre-Web-NextGen/releases/latest)
-[![Container](https://img.shields.io/badge/ghcr.io-calibre--web--nextgen-blue?logo=docker)](https://github.com/new-usemame/Calibre-Web-NextGen/pkgs/container/calibre-web-nextgen)
-[![Open issues](https://img.shields.io/github/issues/new-usemame/Calibre-Web-NextGen)](https://github.com/new-usemame/Calibre-Web-NextGen/issues)
-[![Sponsor](https://img.shields.io/badge/Sponsor-nothing%20paywalled-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/new-usemame)
+# About Calibre-Web NextGen
 
----
-
-## Switch from upstream CWA
-
-```diff
-- image: crocodilestick/calibre-web-automated:latest
-+ image: ghcr.io/new-usemame/calibre-web-nextgen:latest
-```
-
-```bash
-docker compose pull && docker compose up -d
-```
-
-Library, settings, users, OAuth tokens, and KOReader sync state are preserved. Switching back is the reverse one-line change.
-
-> **Not using a terminal?** If you run Docker through a NAS or a GUI, follow a step-by-step guide instead — they cover both a fresh install and switching from CWA, with the exact buttons for your platform: **[Synology](docs/install/synology.md) · [Unraid](docs/install/unraid.md) · [Portainer](docs/install/portainer.md) · [TrueNAS SCALE](docs/install/truenas.md) · [all guides](docs/install/)**. Configuration not matching? [Open an issue](https://github.com/new-usemame/Calibre-Web-NextGen/issues) or [ask on Discord](https://discord.gg/B8NXZmcp32) and we'll walk you through it.
-
-- **Bug?** [File it here.](https://github.com/new-usemame/Calibre-Web-NextGen/issues/new?template=bug_report.md)
-- **Feature idea?** [Open a request.](https://github.com/new-usemame/Calibre-Web-NextGen/issues/new?template=feature_request.md) Anything goes, no checklist required — even half-formed ideas are welcome and help prioritize what to look at next.
-- **New here?** See [Quick start](#quick-start) below.
-- **Want to back the work?** [**Sponsor on GitHub**](https://github.com/sponsors/new-usemame) — no rewards, no paywalled features, one-time or monthly. [Here's what it actually pays for.](#supporting-the-project)
-- **Setting up with an AI assistant** (Claude, ChatGPT, etc.)? Point it at [`AI_README.md`](AI_README.md) — a setup guide written for the assistant to follow, verify, and hand back to you working.
-- **Wondering how AI is used here?** [How AI is used](#how-ai-is-used) — used heavily to develop this fork, not at all in the software you run, and what gates it.
-
----
+The rest of this README is the Calibre-Web NextGen documentation. It applies to NextGen+ as written; the image name in its examples is already the NextGen+ one.
 
 ## Table of contents
 
@@ -139,7 +140,7 @@ Requirements: Docker and Docker Compose.
    ```yaml
    services:
      calibre-web:
-       image: ghcr.io/new-usemame/calibre-web-nextgen:latest
+       image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
        container_name: calibre-web
        environment:
          - PUID=1000
@@ -175,7 +176,7 @@ A more complete compose file, with each option documented:
 ```yaml
 services:
   calibre-web:
-    image: ghcr.io/new-usemame/calibre-web-nextgen:latest
+    image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
     container_name: calibre-web
     environment:
       # Match your host user/group so files in your library
@@ -329,7 +330,7 @@ docker compose pull calibre-web && docker compose up -d calibre-web
 ```yaml
 services:
   calibre-web:
-    image: ghcr.io/new-usemame/calibre-web-nextgen:latest
+    image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
     labels: ["com.centurylinklabs.watchtower.enable=true"]
     # ...rest of your config
 
@@ -353,7 +354,7 @@ podman run -d --name calibre-web \
   -v /path/to/config:/config \
   -v /path/to/library:/calibre-library \
   -v /path/to/ingest:/cwa-book-ingest \
-  ghcr.io/new-usemame/calibre-web-nextgen:latest
+  ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
 ```
 
 Rootless Podman remaps user IDs, so if the container can't write to your volumes, add `--userns=keep-id` (or run it rootful). Podman also has native automatic updates (`podman auto-update`) with rollback — a step-by-step guide is coming once we've verified it against this image.
@@ -368,7 +369,7 @@ One line. Stop the container, swap the image, start it.
 
 ```diff
 - image: crocodilestick/calibre-web-automated:latest
-+ image: ghcr.io/new-usemame/calibre-web-nextgen:latest
++ image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
 ```
 
 ```bash

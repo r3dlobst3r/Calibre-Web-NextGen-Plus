@@ -21,7 +21,7 @@ storage you attach to the app — not in the image — so switching keeps everyt
    ```yaml
    services:
      calibre-web-nextgen:
-       image: ghcr.io/new-usemame/calibre-web-nextgen:latest
+       image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
        container_name: calibre-web-nextgen
        environment:
          - PUID=568
@@ -44,7 +44,7 @@ storage you attach to the app — not in the image — so switching keeps everyt
 ## Form-based Custom App (older SCALE)
 
 If you don't have a YAML box, use the form fields:
-- **Image repository:** `ghcr.io/new-usemame/calibre-web-nextgen` — **Image tag:** `latest`
+- **Image repository:** `ghcr.io/r3dlobst3r/calibre-web-nextgen-plus` — **Image tag:** `latest`
 - **Container port:** `8083`, with a Node port to reach it on.
 - **Storage / Host Path Volumes** (add three): host dataset → `/config`,
   your library → `/calibre-library`, an ingest folder → `/cwa-book-ingest`.

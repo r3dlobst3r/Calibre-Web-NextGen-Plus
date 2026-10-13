@@ -80,7 +80,7 @@ Open the shelf and use the **Enable Kobo sync** button on the shelf page. It rea
 - **Smart shelves**: the same button, added in **v4.1.19**. On an older build the
   control exists only in the classic interface — you would find it when editing the
   shelf in classic, and not find it at all in the new UI. If that is what you are
-  seeing, `docker pull ghcr.io/new-usemame/calibre-web-nextgen:latest` and restart.
+  seeing, `docker pull ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest` and restart.
 
 Then sync the Kobo.
 

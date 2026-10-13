@@ -46,7 +46,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 PROD_COMPOSE = REPO_ROOT / "docker-compose.yml"
 DEV_COMPOSE = REPO_ROOT / "docker-compose.yml.dev"
 
-OUR_IMAGE = "ghcr.io/new-usemame/calibre-web-nextgen"
+OUR_IMAGE = "ghcr.io/r3dlobst3r/calibre-web-nextgen-plus"
 
 
 def _service(path: Path) -> dict:

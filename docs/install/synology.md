@@ -40,7 +40,7 @@ own user's, shown under Control Panel → User → your account → details.)*
    ```yaml
    services:
      calibre-web-nextgen:
-       image: ghcr.io/new-usemame/calibre-web-nextgen:latest
+       image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
        container_name: calibre-web-nextgen
        environment:
          - PUID=1026
@@ -74,7 +74,7 @@ update NextGen:
    gives an "in use" error. Deleting the container is safe: your books, users and settings
    live in the mounted folders, and the project's compose file recreates the container for you
    in step 4.
-3. **Container Manager → Image** → click the `ghcr.io/new-usemame/calibre-web-nextgen:latest`
+3. **Container Manager → Image** → click the `ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest`
    row → **Aktion / Action → Löschen / Delete**. Now that no container uses it, this succeeds
    and clears the cached copy so the next build pulls a fresh image. (Your data is in the
    mounted folders, not here.)

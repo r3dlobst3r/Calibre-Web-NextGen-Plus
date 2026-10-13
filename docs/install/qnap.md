@@ -34,7 +34,7 @@ for `/config`, `/calibre-library` and `/cwa-book-ingest`, and your `PUID`/`PGID`
    ```yaml
    services:
      calibre-web-nextgen:
-       image: ghcr.io/new-usemame/calibre-web-nextgen:latest
+       image: ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest
        container_name: calibre-web-nextgen
        environment:
          - PUID=1000
@@ -63,12 +63,12 @@ Restarting the container does **not** pull a newer image. To actually update:
 1. **Container Station → Applications** → your `calibre-web-nextgen` application → **Stop**.
 2. Open the application's YAML editor and **Recreate** (some QTS versions label this
    **Update** or **Pull image and recreate**). Container Station re-pulls
-   `ghcr.io/new-usemame/calibre-web-nextgen:latest` and recreates the container with your data
+   `ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest` and recreates the container with your data
    intact.
 
    If your Container Station version has no "recreate/pull" option, delete the **container**
    first (your data in the shared folders is untouched), then delete the cached
-   `ghcr.io/new-usemame/calibre-web-nextgen:latest` image under **Images**, then **Create** the
+   `ghcr.io/r3dlobst3r/calibre-web-nextgen-plus:latest` image under **Images**, then **Create** the
    application again from the same YAML — that forces a fresh pull.
 
 ---
