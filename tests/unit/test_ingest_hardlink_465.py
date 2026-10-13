@@ -227,3 +227,28 @@ def test_close_write_path_unchanged_without_event_arg(harness):
     # Empty event string -> gate is skipped, normal processing applies.
     processed = harness(str(target), "")
     assert str(target) in processed
+
+
+def test_published_acquisition_create_is_ingested_after_its_private_link_is_gone(harness):
+    """A book-source publication links the finished book in from a private temp
+    directory and removes that directory straight away. On a fast system the
+    watcher sees nlink == 1 by the time it runs, and no close_write ever follows,
+    so the request sat in `importing` until its deadline. The sidecar is written
+    first, so its presence marks the CREATE as the complete file."""
+    target = harness.watch / "cwng-acquisition-abc123.epub"
+    target.write_text("complete book content")
+    (harness.watch / "cwng-acquisition-abc123.epub.cwa.json").write_text("{}")
+    assert target.stat().st_nlink == 1
+
+    processed = harness(str(target), "CREATE")
+    assert str(target) in processed
+
+
+def test_acquisition_name_without_its_sidecar_still_waits(harness):
+    """Only a real publication (sidecar already in place) skips the link-count
+    check; a file that merely looks like one is treated like any other."""
+    target = harness.watch / "cwng-acquisition-abc123.epub"
+    target.write_text("partial...")
+
+    processed = harness(str(target), "CREATE")
+    assert str(target) not in processed
