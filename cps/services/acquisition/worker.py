@@ -14,15 +14,18 @@ import shutil
 import time
 
 from .catalog import policy
-from .contracts import DIRECT_FORMATS, MOBI_MEDIA_TYPE, direct_format_allowed
+from .contracts import (AUDIOBOOK_FORMATS, DIRECT_FORMATS, IMPORTABLE_FORMATS, MOBI_MEDIA_TYPE,
+                        direct_format_allowed, importable_format_allowed)
 from .http import TransportError, run_transfer
 from .staging import (StagingError, cleanup_settled, digest, discard_publication, persist_capability,
                       publish, publication_state, validate_book)
-from .storage import Conflict
+from .storage import Conflict, StorageError
 from .clients import CLIENTS, USENET_KINDS, TORRENT_KINDS, torrent_book, torrent_books
 from .torrent import magnet_identities, validate_torrent
 from .sabnzbd import SABClient, ClientError, completed_book, completed_books, open_completed_file, validate_nzb, _safe_root
 from .bundle_files import fingerprint_candidates
+from .downloader import (ACTIVE_STATES as DOWNLOADER_ACTIVE_STATES, ADAPTER as DOWNLOADER, DownloaderError,
+                         UNKNOWN_MEDIA, local_engine)
 
 # A conversion of a large book can legitimately run for a long time, and a
 # terminal processor result is reported explicitly, so this bound only exists
@@ -34,6 +37,38 @@ IMPORT_RECHECK_SECONDS = 30
 
 
 DOWNLOAD_DEADLINE_SECONDS = 7 * 24 * 60 * 60
+# The download engine works its own queue; asking again sooner only adds polling.
+DOWNLOADER_RECHECK_SECONDS = 15
+# An audiobook is one large audio file; ebooks keep the ordinary limit.
+AUDIOBOOK_MAX_BYTES = 4 * 1024 * 1024 * 1024
+
+
+def sniff_media_type(source, *, max_bytes):
+    """The importable format of a staged file whose source did not promise one."""
+    with source.open('rb') as stream:
+        signature = stream.read(68)
+    if signature[4:8] == b'ftyp':
+        # An MPEG-4 audiobook: `M4B ` marks one explicitly, anything else is m4a.
+        media_type = 'audio/x-m4b' if signature[8:12] == b'M4B ' else 'audio/mp4'
+        validate_book(source, media_type, max_bytes=max_bytes)
+        return media_type
+    # Magic selects the existing strict byte validator; it never grants
+    # admission on its own.
+    media_type = ('application/pdf' if signature[:5] == b'%PDF-' else
+                  MOBI_MEDIA_TYPE if signature[60:68] == b'BOOKMOBI' else
+                  'application/epub+zip')
+    if signature[:5] == b'%PDF-' and signature[60:68] == b'BOOKMOBI':
+        # A legal PalmDB name can begin with the PDF marker, and a
+        # legal PDF can contain BOOKMOBI at this offset. Resolve
+        # that ambiguity with the existing full validators.
+        try:
+            validate_book(source, MOBI_MEDIA_TYPE, max_bytes=max_bytes)
+        except StagingError:
+            pass  # Still requires the PDF validator below.
+        else:
+            media_type = MOBI_MEDIA_TYPE
+    validate_book(source, media_type, max_bytes=max_bytes)
+    return media_type
 
 
 class Paused(Exception):
@@ -50,9 +85,12 @@ class AcquisitionWorker:
                  transfer=run_transfer, max_bytes=100 * 1024 * 1024,
                  import_deadline_seconds=IMPORT_DEADLINE_SECONDS,
                  import_recheck_seconds=IMPORT_RECHECK_SECONDS, client_factory=None,
-                 download_deadline_seconds=DOWNLOAD_DEADLINE_SECONDS):
+                 download_deadline_seconds=DOWNLOAD_DEADLINE_SECONDS, engine_factory=local_engine,
+                 clock=time.time):
         self.repository = repository
         self.client_factory = client_factory
+        self.engine_factory = engine_factory
+        self.clock = clock
         self.download_deadline_seconds = download_deadline_seconds
         self.staging_dir, self.ingest_dir = Path(staging_dir), Path(ingest_dir)
         self.allowed, self.enabled, self.transfer = allowed, enabled, transfer
@@ -98,6 +136,9 @@ class AcquisitionWorker:
         last_heartbeat = 0.0
         media_type = None
         usenet = False
+        downloader = False
+        offer = config = None
+        limit = self.max_bytes
 
         def checkpoint():
             nonlocal last_heartbeat
@@ -140,15 +181,22 @@ class AcquisitionWorker:
             checkpoint()
             material = repo.material(job.id, token)
             offer, config = material.offer, material.config
+            downloader = offer.get('transport') == DOWNLOADER
             if (offer.get('kind') != 'acquisition'
-                    or offer.get('media_type') not in tuple(DIRECT_FORMATS) + ('application/x-nzb', 'application/x-bittorrent')):
+                    or offer.get('media_type') not in tuple(DIRECT_FORMATS) + ('application/x-nzb', 'application/x-bittorrent')
+                    and not (downloader and (offer.get('media_type') in AUDIOBOOK_FORMATS
+                                             or offer.get('media_type') == UNKNOWN_MEDIA))):
                 raise TransportError('unsupported_offer')
             usenet = offer.get('transport') in ('nzb', 'torrent')
-            media_type = None if usenet else offer['media_type']
-            if not usenet and not direct_format_allowed(media_type, config):
+            if downloader and offer.get('content_type') == 'audiobook':
+                limit = AUDIOBOOK_MAX_BYTES
+            # A downloader release of unknown format is judged by its bytes once fetched.
+            media_type = None if usenet or offer['media_type'] == UNKNOWN_MEDIA else offer['media_type']
+            if media_type is not None and not (importable_format_allowed(media_type, config) if downloader
+                                               else direct_format_allowed(media_type, config)):
                 raise TransportError('unsupported_offer')
             checkpoint()
-            extension = DIRECT_FORMATS.get(media_type, (None, None))[1]
+            extension = IMPORTABLE_FORMATS.get(media_type, (None, None))[1]
             if state == 'queued':
                 advance('resolving')
             if state == 'resolving':
@@ -158,7 +206,7 @@ class AcquisitionWorker:
                 source = private / 'source.part'
                 # The new claim always gets a fresh private attempt. No Range
                 # requests or blind reuse of an interrupted download are implied.
-                if shutil.disk_usage(private).free < self.max_bytes + 64 * 1024 * 1024:
+                if shutil.disk_usage(private).free < limit + 64 * 1024 * 1024:
                     raise TransportError('insufficient_storage')
                 if usenet:
                     completed = self._download_client(job, token, offer, config, source, checkpoint)
@@ -177,6 +225,16 @@ class AcquisitionWorker:
                     checkpoint()
                     validate_book(source, media_type, max_bytes=self.max_bytes)
                     source_hash = digest(source)
+                elif downloader:
+                    fetched = self._download_engine(offer, config, source, checkpoint, limit)
+                    if fetched is None:
+                        repo.release(job.id, token, delay_seconds=DOWNLOADER_RECHECK_SECONDS)
+                        shutil.rmtree(private)
+                        return repo.get_job(job.owner_id, job.id)
+                    media_type, source_hash = fetched
+                    checkpoint()
+                    if digest(source) != source_hash:
+                        raise StagingError('source_changed')
                 else:
                     downloaded = self.transfer(offer['href'], policy(config, download=True),
                         destination=source, max_bytes=self.max_bytes, checkpoint=checkpoint)
@@ -186,32 +244,19 @@ class AcquisitionWorker:
                     source_hash = downloaded.sha256
                 checkpoint()
                 advance('staged', source_sha256=source_hash, staging_key=token)
+                if downloader:
+                    # The staged copy is durable now, so the engine's file can go.
+                    self.engine_factory(config).discard(offer['task_id'])
             source_hash, staging_key = repo.staged_identity(job.id, token)
             private = self._directory(job.id, staging_key)
             source = private / 'source.part'
             if digest(source) != source_hash:
                 raise StagingError('source_changed')
-            if usenet:
-                with source.open('rb') as stream:
-                    signature = stream.read(68)
+            if usenet or downloader:
                 # A staged client source is already hash-bound, but its format
-                # must survive a new worker. Magic selects the existing strict
-                # byte validator; it never grants admission on its own.
-                media_type = ('application/pdf' if signature[:5] == b'%PDF-' else
-                              MOBI_MEDIA_TYPE if signature[60:68] == b'BOOKMOBI' else
-                              'application/epub+zip')
-                if signature[:5] == b'%PDF-' and signature[60:68] == b'BOOKMOBI':
-                    # A legal PalmDB name can begin with the PDF marker, and a
-                    # legal PDF can contain BOOKMOBI at this offset. Resolve
-                    # that ambiguity with the existing full validators.
-                    try:
-                        validate_book(source, MOBI_MEDIA_TYPE, max_bytes=self.max_bytes)
-                    except StagingError:
-                        pass  # Still requires the PDF validator below.
-                    else:
-                        media_type = MOBI_MEDIA_TYPE
-                validate_book(source, media_type, max_bytes=self.max_bytes)
-                extension = DIRECT_FORMATS[media_type][1]
+                # must survive a new worker.
+                media_type = sniff_media_type(source, max_bytes=limit)
+                extension = IMPORTABLE_FORMATS[media_type][1]
             token_path = private / 'publication.token'
             if token_path.exists() or token_path.is_symlink():
                 if token_path.is_symlink() or not token_path.is_file() or token_path.stat().st_size > 128:
@@ -239,6 +284,9 @@ class AcquisitionWorker:
                     _, current_client = self._client_material(offer)
                     if media_type == MOBI_MEDIA_TYPE and current_client.get('allow_mobi') is not True:
                         raise TransportError('format_not_allowed')
+                elif downloader:
+                    if not importable_format_allowed(media_type, repo.connection_config(job.connection_id).config):
+                        raise TransportError('unsupported_offer')
                 elif not direct_format_allowed(media_type, repo.connection_config(job.connection_id).config):
                     raise TransportError('unsupported_offer')
             permit = repo.prepare_publication(job.id, token, publication_token,
@@ -253,6 +301,8 @@ class AcquisitionWorker:
             repo.release(job.id, token,
                 delay_seconds=self.import_recheck_seconds if state == 'importing' else 5)
         except Cancelled:
+            if state == 'downloading':
+                self._stop_engine_download(job, offer, config)
             settle(lambda: advance('cancelled'))
         except Paused:
             settle(lambda: repo.release(job.id, token, delay_seconds=5))
@@ -286,6 +336,58 @@ class AcquisitionWorker:
         if current.state in ('imported', 'failed', 'cancelled'):
             self._cleanup(job.id)
         return current
+
+    def _stop_engine_download(self, job, offer, config):
+        """Stop an engine download nobody is waiting for any more; best effort only.
+
+        Cancellation can be noticed before this claim has read its offer, so the
+        durable offer and current connection are read here when needed.
+        """
+        try:
+            offer = offer if offer is not None else self.repository.job_offer(job.owner_id, job.id)
+            if offer.get('transport') != DOWNLOADER:
+                return
+            if config is None:
+                config = self.repository.connection_config(job.connection_id, include_disabled=True).config
+            self.engine_factory(config).cancel(offer['task_id'])
+        except (StorageError, TransportError, ValueError, KeyError):
+            pass
+
+    def _download_engine(self, offer, config, source, checkpoint, limit):
+        """Queue the release in the download engine, then take a private copy once done.
+
+        The engine names a download by the release's own id and refuses to queue it
+        twice, so queueing again after an interruption cannot start a second
+        download. None means "not finished yet, ask again later".
+        """
+        engine = self.engine_factory(config)
+        task_id = offer['task_id']
+        found = engine.task(task_id)
+        if found is None:
+            engine.queue(offer['release'])
+            return None
+        status, task = found
+        if status in DOWNLOADER_ACTIVE_STATES:
+            added = task.get('added_time')
+            if isinstance(added, (int, float)) and self.clock() - added >= self.download_deadline_seconds:
+                raise DownloaderError('client_job_stalled')
+            return None
+        if status != 'complete':
+            # error, or cancelled in the engine. Retrying the job queues it again.
+            raise DownloaderError('client_job_failed')
+        checkpoint()
+        source_hash = engine.download(task_id, source, max_bytes=limit, checkpoint=checkpoint)
+        try:
+            media_type = sniff_media_type(source, max_bytes=limit)
+        except StagingError:
+            source.unlink(missing_ok=True)
+            raise DownloaderError('no_usable_book') from None
+        audiobook = offer.get('content_type') == 'audiobook'
+        if ((media_type in AUDIOBOOK_FORMATS) != audiobook or not self.media_allowed(media_type)
+                or not importable_format_allowed(media_type, config)):
+            source.unlink(missing_ok=True)
+            raise DownloaderError('format_not_allowed')
+        return media_type, source_hash
 
     def _client_material(self, offer):
         clients = [row for row in self.repository.list_connections() if row.id == offer.get('client_id')

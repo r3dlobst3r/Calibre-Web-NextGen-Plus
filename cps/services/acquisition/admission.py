@@ -7,7 +7,7 @@ import re
 
 from ... import constants
 from .migration import VERSION
-from .contracts import DIRECT_FORMATS, MOBI_MEDIA_TYPE
+from .contracts import AUDIOBOOK_FORMATS, DIRECT_FORMATS, IMPORTABLE_FORMATS, MOBI_MEDIA_TYPE
 
 
 class AdmissionError(ValueError):
@@ -81,6 +81,8 @@ def allowed_client_media_types(repo, client_id, revision=None, *, allowed_media_
 
 
 def acquisition_offer(payload, allowed_media_types=None, *, allow_mobi=False, allow_client_mobi=False):
+    if isinstance(payload, dict) and payload.get('kind') == 'acquisition' and payload.get('transport') == 'downloader':
+        return _downloader_offer(payload, allowed_media_types, allow_mobi=allow_mobi)
     if (not isinstance(payload, dict) or payload.get('kind') != 'acquisition'
             or payload.get('media_type') not in tuple(DIRECT_FORMATS) + ('application/x-nzb','application/x-bittorrent')):
         raise AdmissionError('unsupported_offer')
@@ -97,6 +99,27 @@ def acquisition_offer(payload, allowed_media_types=None, *, allow_mobi=False, al
         raise AdmissionError('format_disabled')
 
 
+def _downloader_offer(payload, allowed_media_types, *, allow_mobi):
+    """A release from the download engine: a known format, or one its bytes decide."""
+    media = payload.get('media_type')
+    release = payload.get('release')
+    audiobook = payload.get('content_type') == 'audiobook'
+    if (payload.get('content_type') not in ('ebook', 'audiobook') or not isinstance(payload.get('task_id'), str)
+            or not payload['task_id'] or not isinstance(release, dict) or release.get('source_id') != payload['task_id']):
+        raise AdmissionError('unsupported_offer')
+    if media == 'application/octet-stream':
+        importable = (set(AUDIOBOOK_FORMATS) if audiobook else
+                      {'application/epub+zip', 'application/pdf'} | ({MOBI_MEDIA_TYPE} if allow_mobi is True else set()))
+        if allowed_media_types is not None and not importable & set(allowed_media_types):
+            raise AdmissionError('format_disabled')
+        return
+    if (media not in IMPORTABLE_FORMATS or (media in AUDIOBOOK_FORMATS) != audiobook
+            or media == MOBI_MEDIA_TYPE and allow_mobi is not True):
+        raise AdmissionError('unsupported_offer')
+    if allowed_media_types is not None and media not in allowed_media_types:
+        raise AdmissionError('format_disabled')
+
+
 def create_request(repo, owner_id, *, connection_id, offer_id, idempotency_key, add_to_my_library=True):
     role = account_role(repo.engine, owner_id)
     if not instance_enabled(repo.engine) or role is None or not role & constants.ROLE_ACQUISITION_ACCESS:
@@ -106,7 +129,7 @@ def create_request(repo, owner_id, *, connection_id, offer_id, idempotency_key, 
     for value in (connection_id, offer_id, idempotency_key):
         if not isinstance(value, str) or not value.strip() or len(value)>128:
             raise AdmissionError('invalid_request')
-    if not any(row.id==connection_id and row.adapter in ('opds', 'newznab') for row in repo.list_connections()):
+    if not any(row.id==connection_id and row.adapter in ('opds', 'newznab', 'downloader') for row in repo.list_connections()):
         raise AdmissionError('unsupported_connection')
     formats=configured_media_types(repo.engine)
     connection_config = repo.connection_config(connection_id).config
@@ -199,7 +222,7 @@ def job_allowed(database, job_id, owner_id):
         return False
 
 
-_FORMAT_MEDIA_TYPES = {extension: media for media, (_label, extension) in DIRECT_FORMATS.items()}
+_FORMAT_MEDIA_TYPES = {extension: media for media, (_label, extension) in IMPORTABLE_FORMATS.items()}
 
 
 def configured_media_types(database):

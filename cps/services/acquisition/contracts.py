@@ -15,6 +15,22 @@ DIRECT_FORMATS = MappingProxyType({
 })
 
 
+# Audiobooks the download engine can import: one MPEG-4 audio file per book.
+# Kept apart from DIRECT_FORMATS so catalogs and download clients keep offering
+# exactly what they did; only the downloader produces these.
+AUDIOBOOK_FORMATS = MappingProxyType({
+    'audio/x-m4b': ('M4B', 'm4b'),
+    'audio/mp4': ('M4A', 'm4a'),
+})
+# Everything acquisition can publish into ingest.
+IMPORTABLE_FORMATS = MappingProxyType({**DIRECT_FORMATS, **AUDIOBOOK_FORMATS})
+
+
+def importable_format_allowed(media_type, config):
+    """A direct format (MOBI still needs its opt-in) or an audiobook format."""
+    return media_type in AUDIOBOOK_FORMATS or direct_format_allowed(media_type, config)
+
+
 def direct_format_allowed(media_type, config):
     """Source capability plus the administrator's explicit catalog opt-in."""
     return (isinstance(media_type, str) and media_type in DIRECT_FORMATS

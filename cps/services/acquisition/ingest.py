@@ -14,7 +14,7 @@ from pathlib import Path
 from sqlalchemy import text
 
 from .storage import ImportOutcome
-from .contracts import DIRECT_FORMATS
+from .contracts import IMPORTABLE_FORMATS
 
 RESULT_TABLE = "cwng_acquisition_ingest_result"
 NAME_PREFIX = "cwng-acquisition-"
@@ -52,7 +52,7 @@ def load_intent(repo, source_path, ingest_dir, manifest):
         root = Path(ingest_dir).resolve(strict=True)
         if (path.is_symlink() or not path.is_file() or path.parent.resolve(strict=True) != root
                 or path.name not in tuple(NAME_PREFIX + key + '.' + extension
-                    for _label, extension in DIRECT_FORMATS.values())):
+                    for _label, extension in IMPORTABLE_FORMATS.values())):
             raise IngestIntentError("Acquisition source path does not match intent")
         job, permit = repo.publication_intent(manifest.get("job_id"), manifest.get("publication_token"), key)
         if source_digest(path) != permit.source_sha256:

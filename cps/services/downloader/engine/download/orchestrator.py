@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import random
+import shutil
 import threading
 import time
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -428,7 +429,11 @@ def discard_delivered_file(task_id: str) -> bool:
     if not path:
         return False
     try:
-        Path(path).unlink(missing_ok=True)
+        # A multi-file release (an audiobook folder) is delivered as a directory.
+        if Path(path).is_dir():
+            shutil.rmtree(path)
+        else:
+            Path(path).unlink(missing_ok=True)
     except OSError as e:
         logger.warning("Could not discard delivered file for task %s: %s", task_id, e)
         return False

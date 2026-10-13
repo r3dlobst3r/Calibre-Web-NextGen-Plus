@@ -14,7 +14,7 @@ import stat
 import tempfile
 import zipfile
 import xml.etree.ElementTree as ET
-from .contracts import DIRECT_FORMATS, MOBI_MEDIA_TYPE
+from .contracts import AUDIOBOOK_FORMATS, IMPORTABLE_FORMATS, MOBI_MEDIA_TYPE
 from .mobi import MobiError, validate_mobi
 
 
@@ -23,7 +23,7 @@ class StagingError(ValueError):
 
 
 NAME_PREFIX = 'cwng-acquisition-'
-BOOK_EXTENSIONS = tuple(extension for _label, extension in DIRECT_FORMATS.values())
+BOOK_EXTENSIONS = tuple(extension for _label, extension in IMPORTABLE_FORMATS.values())
 # Written by cwa-ingest-service when the processor ends terminally on an
 # acquisition file (exit 3 retains the book; the safety timeout, 124, removes
 # it). A name the watcher and the processor already skip. It carries no
@@ -102,6 +102,14 @@ def validate_book(path, media_type, *, max_bytes=100 * 1024 * 1024):
             return validate_mobi(path, max_bytes=max_bytes)
         except MobiError as error:
             raise StagingError(str(error)) from None
+    if media_type in AUDIOBOOK_FORMATS:
+        # An MPEG-4 file opens with a box whose type is `ftyp`; an error page or
+        # an archive does not. The ingest processor reads the rest.
+        with path.open('rb') as stream:
+            header = stream.read(12)
+        if len(header) < 12 or header[4:8] != b'ftyp':
+            raise StagingError('invalid_audiobook')
+        return AUDIOBOOK_FORMATS[media_type][1]
     if media_type == 'application/pdf':
         with path.open('rb') as stream:
             header = stream.read(16)
