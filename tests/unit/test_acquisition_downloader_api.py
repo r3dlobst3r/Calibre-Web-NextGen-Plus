@@ -51,8 +51,16 @@ def api(tmp_path, monkeypatch):
     monkeypatch.setattr(module, 'worker_available', available)
     monkeypatch.setattr(admin_module, 'worker_available', available)
     monkeypatch.setattr(module, '_book_search', book_search)
+    feeds = []
+    def discover(locale):
+        def records(feed):
+            feeds.append((feed, locale))
+            return [dict(RECORD, id='OL9W', title='Popular Book'), dict(RECORD, id='OL2W', title='Owned Book')]
+        return records
+    monkeypatch.setattr(module, '_discover', discover)
     monkeypatch.setattr(module, 'DownloaderService',
-        lambda repo, book_search=None: dl.DownloaderService(repo, book_search=book_search, engine_factory=fake.factory))
+        lambda repo, book_search=None, discover=None: dl.DownloaderService(
+            repo, book_search=book_search, discover=discover, engine_factory=fake.factory))
     monkeypatch.setattr(dl, 'local_engine', fake.factory)
     monkeypatch.setattr(module, '_owned_book_id', lambda publication: None)
     app = Flask(__name__); app.config.update(SECRET_KEY='fixture-secret', RATELIMIT_ENABLED=False, WTF_CSRF_ENABLED=False)
@@ -60,7 +68,7 @@ def api(tmp_path, monkeypatch):
         module.limiter.init_app(app)
     app.register_blueprint(api_v1)
     yield SimpleNamespace(client=app.test_client(), repo=repo, actor=actor, module=module, admin=admin_module,
-                          dl=dl, connection=connection, fake=fake, searches=searches, monkeypatch=monkeypatch)
+                          dl=dl, connection=connection, fake=fake, searches=searches, feeds=feeds, monkeypatch=monkeypatch)
     engine.dispose()
 
 
@@ -90,6 +98,42 @@ def test_search_uses_the_readers_locale_and_marks_owned_books(api):
     assert response.status_code == 200 and api.searches == [('dune', 'openlibrary', 'fr')]
     books = {b['title']: b for b in response.get_json()['publications']}
     assert books['Owned Book']['library_book_id'] == 42 and 'library_book_id' not in books['Dune']
+
+
+def feed(api, name):
+    return api.client.get('/api/v1/acquisition/catalog', query_string={'connection': api.connection.id, 'feed': name})
+
+
+def test_a_popular_feed_lists_books_that_can_be_downloaded(api):
+    api.monkeypatch.setattr(api.module, '_owned_book_id', lambda p: 42 if p['title'] == 'Owned Book' else None)
+    response = feed(api, 'genre:fantasy:week')
+    assert response.status_code == 200 and api.feeds == [('genre:fantasy:week', 'fr')]
+    body = response.get_json()
+    assert body['feed'] == 'genre:fantasy:week'
+    books = {b['title']: b for b in body['publications']}
+    assert books['Owned Book']['library_book_id'] == 42
+    nav = books['Popular Book']['navigation'][0]
+    assert nav['relations'] == ['downloader:ebook']
+    # The book opens its releases exactly like a searched one.
+    found = api.client.get('/api/v1/acquisition/catalog', query_string={
+        'connection': api.connection.id, 'selection': nav['selection']}).get_json()
+    assert found['publications']
+
+
+def test_an_unknown_feed_is_refused_before_anything_is_fetched(api):
+    for name in ('genre:astrology:week', 'popular:month', 'genre:fantasy', '../etc'):
+        assert feed(api, name).status_code == 400, name
+    assert api.feeds == []
+
+
+def test_a_feed_that_cannot_be_read_says_so(api):
+    def broken(locale):
+        def records(feed):
+            raise OSError('openlibrary down')
+        return records
+    api.monkeypatch.setattr(api.module, '_discover', broken)
+    response = feed(api, 'popular:week')
+    assert response.status_code == 502 and response.get_json()['error']['code'] == 'search_unavailable'
 
 
 def test_a_failing_ownership_check_never_fails_search(api):

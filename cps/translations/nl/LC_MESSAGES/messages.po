@@ -20754,3 +20754,111 @@ msgstr "Downloads zijn nog niet volledig ingesteld, dus deze boeken kunnen niet 
 #: cps/spa_strings.py
 msgid "Open Downloads"
 msgstr "Downloads openen"
+
+#: cps/spa_strings.py
+msgid "Popular books"
+msgstr "Populaire boeken"
+
+#: cps/spa_strings.py
+msgid "What readers on Open Library are reading. Pick a book to find a copy and download it into this library."
+msgstr "Wat lezers op Open Library lezen. Kies een boek om een exemplaar te zoeken en het naar deze bibliotheek te downloaden."
+
+#: cps/spa_strings.py
+msgid "Period"
+msgstr "Periode"
+
+#: cps/spa_strings.py
+msgid "This week"
+msgstr "Deze week"
+
+#: cps/spa_strings.py
+msgid "All time"
+msgstr "Aller tijden"
+
+#: cps/spa_strings.py
+msgid "Genre"
+msgstr "Genre"
+
+#: cps/spa_strings.py
+msgid "Everything"
+msgstr "Alles"
+
+#: cps/spa_strings.py
+msgid "{list}: popular this week"
+msgstr "{list}: populair deze week"
+
+#: cps/spa_strings.py
+msgid "{list}: popular of all time"
+msgstr "{list}: populair aller tijden"
+
+#: cps/spa_strings.py
+msgid "No books found in this list."
+msgstr "Geen boeken gevonden in deze lijst."
+
+#: cps/spa_strings.py
+msgid "Fantasy"
+msgstr "Fantasy"
+
+#: cps/spa_strings.py
+msgid "Science fiction"
+msgstr "Sciencefiction"
+
+#: cps/spa_strings.py
+msgid "Mystery"
+msgstr "Detective"
+
+#: cps/spa_strings.py
+msgid "Thriller"
+msgstr "Thriller"
+
+#: cps/spa_strings.py
+msgid "Romance"
+msgstr "Romantiek"
+
+#: cps/spa_strings.py
+msgid "Horror"
+msgstr "Horror"
+
+#: cps/spa_strings.py
+msgid "Historical fiction"
+msgstr "Historische roman"
+
+#: cps/spa_strings.py
+msgid "Young adult"
+msgstr "Young adult"
+
+#: cps/spa_strings.py
+msgid "Graphic novels"
+msgstr "Graphic novels"
+
+#: cps/spa_strings.py
+msgid "Classics"
+msgstr "Klassiekers"
+
+#: cps/spa_strings.py
+msgid "Humor"
+msgstr "Humor"
+
+#: cps/spa_strings.py
+msgid "Poetry"
+msgstr "Poëzie"
+
+#: cps/spa_strings.py
+msgid "Biography"
+msgstr "Biografie"
+
+#: cps/spa_strings.py
+msgid "History"
+msgstr "Geschiedenis"
+
+#: cps/spa_strings.py
+msgid "Science"
+msgstr "Wetenschap"
+
+#: cps/spa_strings.py
+msgid "Business"
+msgstr "Zakelijk"
+
+#: cps/spa_strings.py
+msgid "Self-help"
+msgstr "Zelfhulp"

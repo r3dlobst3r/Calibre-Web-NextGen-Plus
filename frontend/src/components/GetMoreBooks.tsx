@@ -87,8 +87,9 @@ function useJobLabel(): (job: AcquisitionJob) => { label: string; tone: 'active'
   }, [t]);
 }
 
-/** Search outside the library through the download service, and pull a book in. */
-export function GetMoreBooks({ query }: { query: string }) {
+/** Search outside the library through the download service, and pull a book in.
+ *  `feed` lists popular books instead of searching (see DiscoverBooks). */
+export function GetMoreBooks({ query, feed }: { query?: string; feed?: string }) {
   const t = useT();
   const { data: me } = useMe();
   const service = useDownloadService(!!me?.acquisition_access);
@@ -96,14 +97,14 @@ export function GetMoreBooks({ query }: { query: string }) {
   const connectionId = service.connection?.id;
 
   const results = useInfiniteQuery({
-    queryKey: ['acquisition', 'downloader-search', connectionId, query],
+    queryKey: ['acquisition', feed ? 'downloader-feed' : 'downloader-search', connectionId, feed ?? query],
     queryFn: ({ pageParam }) => getAcquisitionCatalog(connectionId as string,
-      pageParam ? { selection: pageParam } : { query }),
+      pageParam ? { selection: pageParam } : feed ? { feed } : { query }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last: AcquisitionCatalog) => last.pagination?.[0]?.selection,
-    enabled: !!connectionId && !!query,
+    enabled: !!connectionId && !!(feed || query),
     retry: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: (feed ? 30 : 5) * 60 * 1000,
   });
 
   const jobs = useQuery({
@@ -148,7 +149,7 @@ export function GetMoreBooks({ query }: { query: string }) {
           </button>
         </div>
       ) : !books.length ? (
-        <EmptyState message={t('No books found for "{q}".', { q: query })} />
+        <EmptyState message={feed ? t('No books found in this list.') : t('No books found for "{q}".', { q: query ?? '' })} />
       ) : (
         <>
           {!books.some((book) => book.navigation.some((nav) => nav.relations[0]?.startsWith('downloader:'))) && (

@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
-  Library, Globe, BookCopy, BookPlus, Tag,
+  Library, Globe, BookCopy, BookPlus, Tag, TrendingUp,
   Info, ListChecks, Table2, Wand2, Files, SlidersHorizontal, Check, RotateCcw, X, Pin, PinOff, ChevronDown, Plus,
 } from 'lucide-react';
 import { useShelves, useMe, useMagicShelves, useUpdateSidebar } from '../lib/queries';
@@ -392,6 +392,17 @@ export function Sidebar({ open, onClose, onNavigate }: SidebarProps) {
                     onClick={onNavigate}>
                     <BookPlus size={18} className={styles.icon} aria-hidden="true" focusable={false} />
                     <span>{t('Find books')}</span>
+                  </Link>
+                </li>
+              )}
+              {showFindBooks && (
+                <li>
+                  <Link href="/discover-books"
+                    className={isActive(location, '/discover-books', true) ? styles.itemActive : styles.item}
+                    aria-current={isActive(location, '/discover-books', true) ? 'page' : undefined}
+                    onClick={onNavigate}>
+                    <TrendingUp size={18} className={styles.icon} aria-hidden="true" focusable={false} />
+                    <span>{t('Popular books')}</span>
                   </Link>
                 </li>
               )}

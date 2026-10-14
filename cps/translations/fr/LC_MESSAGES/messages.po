@@ -21370,3 +21370,111 @@ msgstr "Les téléchargements ne sont pas encore entièrement configurés : ces 
 #: cps/spa_strings.py
 msgid "Open Downloads"
 msgstr "Ouvrir Téléchargements"
+
+#: cps/spa_strings.py
+msgid "Popular books"
+msgstr "Livres populaires"
+
+#: cps/spa_strings.py
+msgid "What readers on Open Library are reading. Pick a book to find a copy and download it into this library."
+msgstr "Ce que lisent les lecteurs d’Open Library. Choisissez un livre pour en trouver un exemplaire et le télécharger dans cette bibliothèque."
+
+#: cps/spa_strings.py
+msgid "Period"
+msgstr "Période"
+
+#: cps/spa_strings.py
+msgid "This week"
+msgstr "Cette semaine"
+
+#: cps/spa_strings.py
+msgid "All time"
+msgstr "De tous les temps"
+
+#: cps/spa_strings.py
+msgid "Genre"
+msgstr "Genre"
+
+#: cps/spa_strings.py
+msgid "Everything"
+msgstr "Tout"
+
+#: cps/spa_strings.py
+msgid "{list}: popular this week"
+msgstr "{list} : populaires cette semaine"
+
+#: cps/spa_strings.py
+msgid "{list}: popular of all time"
+msgstr "{list} : populaires de tous les temps"
+
+#: cps/spa_strings.py
+msgid "No books found in this list."
+msgstr "Aucun livre dans cette liste."
+
+#: cps/spa_strings.py
+msgid "Fantasy"
+msgstr "Fantasy"
+
+#: cps/spa_strings.py
+msgid "Science fiction"
+msgstr "Science-fiction"
+
+#: cps/spa_strings.py
+msgid "Mystery"
+msgstr "Policier"
+
+#: cps/spa_strings.py
+msgid "Thriller"
+msgstr "Thriller"
+
+#: cps/spa_strings.py
+msgid "Romance"
+msgstr "Romance"
+
+#: cps/spa_strings.py
+msgid "Horror"
+msgstr "Horreur"
+
+#: cps/spa_strings.py
+msgid "Historical fiction"
+msgstr "Roman historique"
+
+#: cps/spa_strings.py
+msgid "Young adult"
+msgstr "Jeunes adultes"
+
+#: cps/spa_strings.py
+msgid "Graphic novels"
+msgstr "Romans graphiques"
+
+#: cps/spa_strings.py
+msgid "Classics"
+msgstr "Classiques"
+
+#: cps/spa_strings.py
+msgid "Humor"
+msgstr "Humour"
+
+#: cps/spa_strings.py
+msgid "Poetry"
+msgstr "Poésie"
+
+#: cps/spa_strings.py
+msgid "Biography"
+msgstr "Biographie"
+
+#: cps/spa_strings.py
+msgid "History"
+msgstr "Histoire"
+
+#: cps/spa_strings.py
+msgid "Science"
+msgstr "Sciences"
+
+#: cps/spa_strings.py
+msgid "Business"
+msgstr "Économie"
+
+#: cps/spa_strings.py
+msgid "Self-help"
+msgstr "Développement personnel"

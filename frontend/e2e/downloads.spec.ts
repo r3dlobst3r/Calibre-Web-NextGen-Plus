@@ -49,6 +49,7 @@ async function fixture(page: Page, options: { connections?: unknown[]; searchErr
   const jobs: { id: string; state: string; title: string; result?: unknown }[] = [];
   const posted: Record<string, unknown>[] = [];
   const searches: string[] = [];
+  const feeds: string[] = [];
   await page.route('**/api/v1/auth/me', async (route) => {
     const response = await route.fetch();
     const me = await response.json();
@@ -65,6 +66,12 @@ async function fixture(page: Page, options: { connections?: unknown[]; searchErr
       const selection = url.searchParams.get('selection');
       if (selection === 'moby-releases') return route.fulfill({ json: releases });
       if (selection === 'moby-audiobooks') return route.fulfill({ json: audiobooks });
+      if (url.searchParams.get('feed')) {
+        feeds.push(url.searchParams.get('feed') as string);
+        return route.fulfill({ json: { title: 'Downloads', protocol: 'downloader', navigation: [], pagination: [],
+          searches: [], groups: [], facets: [], feed: url.searchParams.get('feed'),
+          publications: [book(), book({ identity: 'owned', title: 'Owned Book', library_book_id: 1 })] } });
+      }
       searches.push(url.searchParams.get('q') ?? '');
       if (options.searchError) {
         return route.fulfill({ status: 502, json: { error: { code: 'search_unavailable',
@@ -83,7 +90,7 @@ async function fixture(page: Page, options: { connections?: unknown[]; searchErr
     if (url.pathname.endsWith('/jobs')) return route.fulfill({ json: { jobs } });
     return route.fallback();
   });
-  return { jobs, posted, searches };
+  return { jobs, posted, searches, feeds };
 }
 
 test('a search can look outside the library and download a book into it', async ({ page }) => {
@@ -172,6 +179,36 @@ test('Admin → Downloads names a switched-on source that is missing its address
   await expect(problems).toContainText('AudiobookBay is switched on but has no hostname.');
   await expect(page.getByText('No ebook source can be searched yet.')).toBeVisible();
   await expectNoSeriousViolations(page);
+});
+
+test('Popular books lists this week and each genre, and downloads from them', async ({ page }) => {
+  const { feeds, posted } = await fixture(page);
+  await page.goto('/app/');
+  // The sidebar links to it (a closed drawer on phones, so open the page directly).
+  await expect(page.getByRole('link', { name: 'Popular books' }).first()).toHaveAttribute('href', /\/discover-books$/);
+  await page.goto('/app/discover-books');
+  await expect(page.getByRole('heading', { name: 'Everything: popular this week' })).toBeVisible();
+  await expect.poll(() => feeds).toEqual(['popular:week']);
+  await expect(page.getByRole('listitem').filter({ hasText: 'Owned Book' }).getByText('In your library')).toBeVisible();
+  await expectNoSeriousViolations(page);
+
+  const genres = page.getByRole('list', { name: 'Genre' });
+  await genres.getByRole('link', { name: 'Fantasy' }).click();
+  await expect(genres.getByRole('link', { name: 'Fantasy' })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('link', { name: 'All time' }).click();
+  await expect(page).toHaveURL(/list=fantasy&period=all/);
+  await expect(page.getByRole('heading', { name: 'Fantasy: popular of all time' })).toBeVisible();
+  await expect.poll(() => feeds).toEqual(['popular:week', 'genre:fantasy:week', 'genre:fantasy:all']);
+
+  // A listed book downloads exactly like a searched one.
+  const moby = page.getByRole('listitem').filter({ hasText: 'Herman Melville' }).first();
+  await moby.getByRole('button', { name: 'Find downloads' }).click();
+  await page.getByRole('list', { name: 'Downloads for Moby Dick' }).getByRole('button', { name: 'Download' }).first().click();
+  await expect.poll(() => posted.length).toBe(1);
+
+  // Reloading keeps the list.
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Fantasy: popular of all time' })).toBeVisible();
 });
 
 test('an audiobook is found and requested from the same search', async ({ page }) => {

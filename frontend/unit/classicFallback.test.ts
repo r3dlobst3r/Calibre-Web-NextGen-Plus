@@ -4,6 +4,7 @@ import { classicFallbackPath } from '../src/lib/classicFallback.ts';
 
 test('gated acquisition tools never suggest a missing classic route, including subpath mounts', () => {
   assert.equal(classicFallbackPath('/app/find-books', ''), null);
+  assert.equal(classicFallbackPath('/app/discover-books', ''), null);
   assert.equal(classicFallbackPath('/books/app/find-books/', '/books'), null);
   assert.equal(classicFallbackPath('/app.v2/app/admin/acquisition', '/app.v2'), null);
   assert.equal(classicFallbackPath('/books/app/book/42', '/books'), '/books/book/42');

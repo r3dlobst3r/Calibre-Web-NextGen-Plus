@@ -3,6 +3,6 @@ export function classicFallbackPath(pathname: string, prefix: string): string | 
   const appBase = `${prefix}/app`;
   const path = pathname.startsWith(`${appBase}/`) ? pathname.slice(appBase.length) : '/';
   if (path.startsWith('//')) return null;
-  if (['/find-books', '/admin/acquisition', '/admin/downloads'].includes(path.replace(/\/+$/, ''))) return null;
+  if (['/find-books', '/discover-books', '/admin/acquisition', '/admin/downloads'].includes(path.replace(/\/+$/, ''))) return null;
   return prefix + path;
 }

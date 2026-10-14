@@ -285,6 +285,14 @@ def _book_search(locale):
     return search
 
 
+def _discover(locale):
+    """Popular books from Open Library for one feed (see services/acquisition/discover.py)."""
+    def discover(feed):
+        from ..services.acquisition import discover as feeds
+        return feeds.records(feed, locale)
+    return discover
+
+
 def _visible_book(identifier):
     from .. import calibre_db
     from .books import _can_browse_global
@@ -515,19 +523,23 @@ def acquisition_bootstrap():
 @api_v1.route('/acquisition/catalog',methods=['GET'])
 @_endpoint(read=REMOTE_READ_RATE)
 def acquisition_catalog():
-    if set(request.args)-{'connection','selection','q'}: raise admission.AdmissionError('invalid_request')
+    if set(request.args)-{'connection','selection','q','feed'}: raise admission.AdmissionError('invalid_request')
     database,owner,connection_id=ub.app_DB_path,_owner(),request.args.get('connection')
-    selection,query=request.args.get('selection'),request.args.get('q')
+    selection,query,feed=request.args.get('selection'),request.args.get('q'),request.args.get('feed')
     # Capture account presentation state before leaving the request context.
     language = getattr(current_user, 'locale', None) or 'en'
     book_search = _book_search(language)
+    discover = _discover(language)
     def browse():
         with runtime.open_repository(database) as repo:
             row = _require_connection(repo,connection_id,catalog=True)
             service = (IndexerService(repo) if row.adapter == 'newznab'
-                else DownloaderService(repo, book_search=book_search) if row.adapter == 'downloader'
+                else DownloaderService(repo, book_search=book_search, discover=discover) if row.adapter == 'downloader'
                 else CatalogService(repo, preferred_language=language))
-            result=service.browse(owner,connection_id,selection=selection,query=query)
+            if feed is not None and row.adapter != 'downloader':
+                raise admission.AdmissionError('invalid_request')
+            result=(service.browse(owner,connection_id,selection=selection,query=query,feed=feed) if feed is not None
+                else service.browse(owner,connection_id,selection=selection,query=query))
             allowed=admission.configured_media_types(repo.engine)
             formats={description[0] for media,description in (IMPORTABLE_FORMATS if row.adapter == 'downloader'
                 else DIRECT_FORMATS).items() if media in allowed}

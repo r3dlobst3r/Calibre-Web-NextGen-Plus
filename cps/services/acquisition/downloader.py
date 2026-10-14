@@ -123,8 +123,9 @@ def release_dict(release):
 class DownloaderService:
     """Catalog-shaped browsing over metadata search and the engine's sources."""
 
-    def __init__(self, repository, *, book_search=None, engine_factory=local_engine):
+    def __init__(self, repository, *, book_search=None, discover=None, engine_factory=local_engine):
         self.repository, self.book_search, self.engine_factory = repository, book_search, engine_factory
+        self.discover = discover
 
     def probe(self, config):
         config = connection_config(config)
@@ -137,7 +138,7 @@ class DownloaderService:
         return {'title': title, 'protocol': ADAPTER, 'publications': [], 'navigation': [],
                 'pagination': [], 'searches': [], 'groups': [], 'facets': []}
 
-    def browse(self, owner_id, connection_id, *, selection=None, query=None):
+    def browse(self, owner_id, connection_id, *, selection=None, query=None, feed=None):
         snapshot = self.repository.connection_config(connection_id)
         config, revision = snapshot.config, snapshot.revision
         if selection is not None:
@@ -149,6 +150,8 @@ class DownloaderService:
                 raise NotFound('Search selection is unavailable')
         if query is not None and (not isinstance(query, str) or not query.strip() or len(query) > 500):
             raise DownloaderError('invalid_search')
+        if feed is not None:
+            return self._feed(owner_id, connection_id, revision, config, feed)
         result = self._catalog('Downloads')
         search = self.repository.create_offer(owner_id, connection_id, {'kind': 'downloader_search'},
                                               expected_revision=revision)
@@ -160,6 +163,29 @@ class DownloaderService:
         engine = self.engine_factory(config)
         kinds = [kind for kind in CONTENT_TYPES if engine.sources(kind)]
         records = self.book_search(query.strip(), config.get('metadata_provider', 'openlibrary')) or []
+        for record in records[:100]:
+            if isinstance(record, dict) and _text(record.get('title')):
+                result['publications'].append(self._book(owner_id, connection_id, revision, record, kinds))
+        result['content_types'] = kinds
+        return result
+
+    def _feed(self, owner_id, connection_id, revision, config, feed):
+        """A list of popular books (see discover.py), shaped like a search result."""
+        from .discover import FeedError, parse_feed
+        try:
+            parse_feed(feed)
+        except FeedError:
+            raise DownloaderError('invalid_search') from None
+        if self.discover is None:
+            raise DownloaderError('search_unavailable')
+        try:
+            records = self.discover(feed) or []
+        except Exception:
+            raise DownloaderError('search_unavailable') from None
+        engine = self.engine_factory(config)
+        kinds = [kind for kind in CONTENT_TYPES if engine.sources(kind)]
+        result = self._catalog('Downloads')
+        result['feed'] = feed
         for record in records[:100]:
             if isinstance(record, dict) and _text(record.get('title')):
                 result['publications'].append(self._book(owner_id, connection_id, revision, record, kinds))

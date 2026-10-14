@@ -28,6 +28,7 @@ import { AdminDevices } from './pages/AdminDevices';
 import { AdminAcquisition } from './pages/AdminAcquisition';
 import { AdminDownloads } from './pages/AdminDownloads';
 import { FindBooks } from './pages/FindBooks';
+import { DiscoverBooks } from './pages/DiscoverBooks';
 import { About } from './pages/About';
 import { Tasks } from './pages/Tasks';
 import { Table } from './pages/Table';
@@ -329,6 +330,9 @@ export function App() {
               account may use it (feature on AND granted). */}
           <Route path={SPA_ROUTES.findBooks}>
             {() => me.acquisition_access ? <FindBooks /> : <NotFound />}
+          </Route>
+          <Route path={SPA_ROUTES.discoverBooks}>
+            {() => me.acquisition_access ? <DiscoverBooks /> : <NotFound />}
           </Route>
 
           {/* Info pages */}
