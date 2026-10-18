@@ -38,5 +38,7 @@
     flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
     margin: 0 calc(-1 * var(--sp-3)); padding: 0 var(--sp-3) 2px;
   }
-  .chips::-webkit-scrollbar { display: none; }
+  @supports not ((scrollbar-width: thin) and (scrollbar-color: red transparent)) {
+    .chips::-webkit-scrollbar { display: none; }
+  }
 }
