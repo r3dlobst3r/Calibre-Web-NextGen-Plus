@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import { apiGet } from '../lib/api';
+import { formatAuthors } from '../lib/authors';
 import { useT } from '../lib/i18n';
 import styles from './SimilarBooks.module.css';
 
@@ -44,7 +45,7 @@ export function SimilarBooks({ bookId }: { bookId: number }) {
                 {b.library_book_id ? <span className={styles.badge}>{t('In your library')}</span> : null}
               </div>
               <span className={styles.name} dir="auto">{b.title}</span>
-              <span className={styles.author} dir="auto">{b.authors.join(', ')}</span>
+              <span className={styles.author} dir="auto">{formatAuthors(b.authors)}</span>
             </>
           );
           return (
