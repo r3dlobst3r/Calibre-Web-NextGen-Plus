@@ -1,5 +1,6 @@
 import { BookReview } from '../components/BookReview';
 import { PersonalRating } from '../components/PersonalRating';
+import { SimilarBooks } from '../components/SimilarBooks';
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, Fragment } from 'react';
 import { Link, useParams, useLocation } from 'wouter';
 import { Download, Pencil, Star, Archive, EyeOff, Eye, Send, Highlighter, Image as ImageIcon, Plus, X, BookOpen, BookCheck, BookPlus, BookX, Glasses, Trash2, RefreshCw, TabletSmartphone, Settings, Upload as UploadIcon } from 'lucide-react';
@@ -1171,6 +1172,8 @@ export function BookDetail() {
           excludeBookId={book.id}
         />
       )}
+
+      <SimilarBooks key={book.id} bookId={book.id} />
 
       {/* Files — the per-format downloads (out of the action row) plus the
           delete/convert/add-format controls that used to sit at the foot of
