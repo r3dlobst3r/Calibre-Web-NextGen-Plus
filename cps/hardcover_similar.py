@@ -3,8 +3,8 @@
 """Hardcover "Books like this".
 
 Hardcover's own /similar page is not part of its public GraphQL API, so this
-approximates it: read the book's genre tags, search Hardcover for popular books
-carrying those genres, and rank them by genre overlap and reader rating.
+approximates it: read the book's genre tags, ask Hardcover for its most-read books
+that carry the top genres, and rank them by genre overlap and reader rating.
 """
 import json
 import math
@@ -28,10 +28,12 @@ BOOK_GENRES_QUERY = (
     "query BookGenres($id: Int!) { "
     "books(where: {id: {_eq: $id}}) { id cached_tags(path: \"Genre\") } }"
 )
-GENRE_SEARCH_QUERY = (
-    "query SimilarBooks($query: String!, $per_page: Int!) { "
-    "search(query: $query, query_type: \"Book\", fields: \"genres\", "
-    "sort: \"users_count:desc\", per_page: $per_page) { results } }"
+POOL_QUERY = (
+    "query SimilarBooks($a: jsonb!, $b: jsonb!, $n: Int!) { "
+    "books(where: {_and: [{cached_tags: {_contains: $a}}, {cached_tags: {_contains: $b}}]}, "
+    "order_by: {users_count: desc}, limit: $n) { "
+    "id slug title release_year rating ratings_count users_count "
+    "cached_tags(path: \"Genre\") image { url } contributions(limit: 3) { author { name } } } }"
 )
 
 _cache = {}
@@ -102,52 +104,64 @@ def parse_genres(cached_tags):
     return [name for _, _, name in sorted(scored)]
 
 
-def parse_hits(results):
-    parsed = _decode(results)
-    hits = parsed.get("hits") if isinstance(parsed, dict) else None
-    docs = []
-    for hit in hits or []:
-        doc = hit.get("document") if isinstance(hit, dict) else None
-        if isinstance(doc, dict) and doc.get("id") and doc.get("title"):
-            docs.append(doc)
-    return docs
-
-
-def rank(docs, genres, source_id):
-    """Order candidate documents by genre overlap, then rating and popularity."""
+def rank(books, genres, source_id):
+    """Order candidate books by genre overlap, then rating and popularity."""
     wanted = {g.lower() for g in genres}
     out = []
-    for doc in docs:
+    for book in books:
         try:
-            doc_id = int(doc["id"])
-        except (TypeError, ValueError):
+            book_id = int(book["id"])
+        except (KeyError, TypeError, ValueError):
             continue
-        if doc_id == source_id:
+        if book_id == source_id or not book.get("title"):
             continue
-        theirs = {str(g).lower() for g in (doc.get("genres") or [])}
+        theirs = {g.lower() for g in parse_genres(book.get("cached_tags"))}
         overlap = len(wanted & theirs)
         if not overlap:
             continue
         jaccard = overlap / len(wanted | theirs)
-        rating = float(doc.get("rating") or 0)
-        popularity = math.log10(1 + float(doc.get("ratings_count") or doc.get("users_count") or 0))
-        out.append((jaccard * 10 + rating + popularity, doc_id, doc))
+        rating = float(book.get("rating") or 0)
+        popularity = math.log10(1 + float(book.get("users_count") or 0))
+        out.append((jaccard * 10 + rating + popularity, book_id, book))
     out.sort(key=lambda row: (-row[0], row[1]))
-    return [doc for _, _, doc in out]
+    return [book for _, _, book in out]
 
 
-def _shape(doc):
-    slug = doc.get("slug") or ""
-    image = doc.get("image")
+def _shape(book):
+    slug = book.get("slug") or ""
+    image = book.get("image")
+    authors = []
+    for contribution in book.get("contributions") or []:
+        name = ((contribution or {}).get("author") or {}).get("name")
+        if isinstance(name, str) and name:
+            authors.append(name)
     return {
-        "hardcover_id": int(doc["id"]),
-        "title": doc["title"],
-        "authors": [a for a in (doc.get("author_names") or []) if isinstance(a, str)],
+        "hardcover_id": int(book["id"]),
+        "title": book["title"],
+        "authors": authors,
         "cover": image.get("url") if isinstance(image, dict) else None,
-        "rating": round(float(doc["rating"]), 2) if doc.get("rating") else None,
-        "year": doc.get("release_year"),
+        "rating": round(float(book["rating"]), 2) if book.get("rating") else None,
+        "year": book.get("release_year"),
         "url": SITE_URL + slug if slug else None,
     }
+
+
+def _pool(genres, tokens):
+    """Most-read books carrying the top two genres, topped up with the top genre
+    alone when the pair is rare. ``None`` on a failed request."""
+    top = genres[:MAX_GENRES]
+    first = {"Genre": [{"tag": top[0]}]}
+    second = {"Genre": [{"tag": top[1]}]} if len(top) > 1 else first
+    data = _post(POOL_QUERY, {"a": first, "b": second, "n": POOL_SIZE}, tokens)
+    if data is None:
+        return None
+    books = list(data.get("books") or [])
+    if len(books) < RESULT_LIMIT and second is not first:
+        more = _post(POOL_QUERY, {"a": first, "b": first, "n": POOL_SIZE}, tokens)
+        if more is not None:
+            seen = {b.get("id") for b in books}
+            books += [b for b in more.get("books") or [] if b.get("id") not in seen]
+    return books
 
 
 def similar_books(hardcover_id, tokens):
@@ -163,15 +177,12 @@ def similar_books(hardcover_id, tokens):
         return []
     books = data.get("books") or []
     genres = parse_genres(books[0].get("cached_tags")) if books else []
-    if not genres:
-        result = []
-    else:
-        found = _post(GENRE_SEARCH_QUERY,
-                      {"query": " ".join(genres[:MAX_GENRES]), "per_page": POOL_SIZE}, tokens)
-        if found is None:
+    result = []
+    if genres:
+        pool = _pool(genres, tokens)
+        if pool is None:
             return []
-        docs = parse_hits(((found.get("search") or {}).get("results")))
-        result = [_shape(d) for d in rank(docs, genres[:MAX_GENRES], hardcover_id)[:RESULT_LIMIT]]
+        result = [_shape(b) for b in rank(pool, genres, hardcover_id)[:RESULT_LIMIT]]
 
     if len(_cache) >= CACHE_MAX:
         _cache.clear()
