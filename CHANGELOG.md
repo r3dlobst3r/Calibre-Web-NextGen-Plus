@@ -16,6 +16,28 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+## [v4.1.49] - 2026-10-19
+
+### Added
+
+- **Calibre-Web NextGen+: download books into the library.** A library search gets a second tab, **Get more books**. It finds books in Open Library, Hardcover or Google Books, marks the ones already in the library, and lists downloads from Anna's Archive and LibGen, plus audiobooks from AudiobookBay through a torrent or debrid client. Requests follow the book-source rules (access, approval, formats, cancel, retry) and are imported through ingest, credited to the person who asked. **Administration → Downloads** switches it on and configures sources, mirrors, download and debrid clients, the built-in Cloudflare bypass and the network. The downloader is Shelfmark's download engine, vendored into the server; see `docs/downloads.md`.
+
+- **Book pages now suggest "Books like this" from Hardcover.** A strip under the book shows related titles that share its genres, ranked by genre overlap and reader rating. Titles already in your library are badged and open their local page; the rest open on Hardcover. It appears only when a Hardcover API key is configured and the book has a Hardcover ID, and results are cached for a day.
+
+### Changed
+
+- **Kobo annotation requests no longer re-inspect the database schema every time.** The Stage 0 capability check now remembers its answer per database and re-checks only when SQLite reports a schema change (a migration, or a dropped trigger or index), so busy Kobo sync paths skip dozens of introspection queries per request while still failing closed if the schema regresses. Closes #2547.
+
+### Fixed
+
+- **A checkout installs on Windows without a C compiler.** `pip install .` failed on Windows because python-ldap has no Windows wheels and has to be built from source. python-ldap and Flask-SimpleLDAP are now skipped on Windows, where the app already runs with LDAP login turned off; Linux, macOS and the Docker image install them as before, so LDAP login keeps working there. Reported by @Rol3333 in #2342, with the platform-marker approach; tests from @theluckystrike's #2583.
+
+- **Kobo sync no longer fails with "database is locked" on books with a Kobo-reported position.** A position the device reports as `<id>!OEBPS!chapter.xhtml` was treated as a vanished chapter and re-placed by fraction on every sync; the uncommitted rewrite failed the sync and left every request erroring until restart. Positions in that form are now matched against the book's chapters and left alone.
+
+- **"Books like this" shows in French and Dutch, and the Popular books genre row hides its scrollbar safely.** The new book-page strip now has French and Dutch text instead of falling back to English, and the genre chips on Popular books keep their hidden scrollbar only on browsers that would otherwise show a thick one.
+
+- **KOReader sleep screens no longer show thin white bands when the image is nearly the screen's shape.** An image that would leave a thin band above and below (or at the sides) is now zoomed just enough to fill the screen, cropping evenly and never stretching. An image far from the screen's shape, where a zoom would cut off more than a tenth of it, is still shown whole on white. Sleep screens set before this update are redone on the device's next sync, with no re-upload; a device whose image comes out the same downloads nothing new.
+
 ## [v4.1.48] - 2026-10-18
 
 ### Added

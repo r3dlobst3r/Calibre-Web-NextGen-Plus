@@ -56,6 +56,33 @@ export interface WhatsNewRelease {
 /** Newest release first. The `whats-new-populate` skill prepends here. */
 export const WHATS_NEW: WhatsNewRelease[] = [
   {
+    version: 'v4.1.49',
+    date: '2026-10-19',
+    items: [
+      {
+        title: 'Find what to read next from a book you liked',
+        body: 'A book with a Hardcover ID now has a Books like this strip under it, with titles that share its genres, best-rated first. Ones you already own are marked and open in your library; the rest open on Hardcover. It needs a Hardcover API key.',
+        category: 'Library',
+      },
+      {
+        title: 'Get more books from inside the library',
+        body: 'A library search now has a Get more books tab that finds titles online, marks the ones you already own, and downloads the ones you ask for into your library. An admin switches it on and sets up sources under Administration, Downloads.',
+        category: 'Library',
+        link: { to: '/discover-books', label: 'Get more books' },
+      },
+      {
+        title: 'Kobo syncs stop failing on some positions',
+        body: 'A reading position some Kobos report was being rewritten on every sync, which could leave syncing stuck with a database error until a restart. Those positions are now left alone, and busy Kobo syncs do less database work.',
+        category: 'Sync',
+      },
+      {
+        title: 'KOReader sleep screens fill the screen',
+        body: 'A sleep-screen picture that nearly matches your reader\'s screen is now zoomed slightly to fill it instead of showing thin white bands. A picture that is far off in shape is still shown whole.',
+        category: 'Sync',
+      },
+    ],
+  },
+  {
     version: 'v4.1.48',
     date: '2026-10-18',
     summary: 'Each device now keeps its own reading place unless you choose to share it. To keep your devices in step as before, tick Share my place for each one under Account → Devices.',
