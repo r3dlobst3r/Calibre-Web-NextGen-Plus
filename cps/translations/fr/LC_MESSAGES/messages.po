@@ -21478,3 +21478,13 @@ msgstr "Économie"
 #: cps/spa_strings.py
 msgid "Self-help"
 msgstr "Développement personnel"
+
+msgid "Books like this"
+msgstr "Livres similaires"
+
+msgid "Suggested by Hardcover"
+msgstr "Suggéré par Hardcover"
+
+#, python-brace-format
+msgid "{title} on Hardcover"
+msgstr "{title} sur Hardcover"

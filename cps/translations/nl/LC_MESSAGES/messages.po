@@ -20862,3 +20862,13 @@ msgstr "Zakelijk"
 #: cps/spa_strings.py
 msgid "Self-help"
 msgstr "Zelfhulp"
+
+msgid "Books like this"
+msgstr "Soortgelijke boeken"
+
+msgid "Suggested by Hardcover"
+msgstr "Voorgesteld door Hardcover"
+
+#, python-brace-format
+msgid "{title} on Hardcover"
+msgstr "{title} op Hardcover"

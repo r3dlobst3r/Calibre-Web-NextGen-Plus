@@ -4,9 +4,9 @@ import json
 from types import SimpleNamespace
 
 import pytest
-from flask import Flask
 from sqlalchemy import MetaData, create_engine, text
 
+from tests.unit.api_app_world import make_app
 from tests.unit.test_acquisition_downloader import RECORD, FakeEngine
 
 CONFIG = {'allow_mobi': False, 'metadata_provider': 'openlibrary'}
@@ -63,7 +63,7 @@ def api(tmp_path, monkeypatch):
             repo, book_search=book_search, discover=discover, engine_factory=fake.factory))
     monkeypatch.setattr(dl, 'local_engine', fake.factory)
     monkeypatch.setattr(module, '_owned_book_id', lambda publication: None)
-    app = Flask(__name__); app.config.update(SECRET_KEY='fixture-secret', RATELIMIT_ENABLED=False, WTF_CSRF_ENABLED=False)
+    app = make_app(SECRET_KEY='fixture-secret', RATELIMIT_ENABLED=False, WTF_CSRF_ENABLED=False)
     if module.limiter is not None:
         module.limiter.init_app(app)
     app.register_blueprint(api_v1)

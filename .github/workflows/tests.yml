@@ -79,9 +79,37 @@ jobs:
   # Duration: a few minutes (~4 on a healthy runner, plus the npm install)
   # Purpose: Catch basic errors immediately
   # ============================================================================
+  # Prefer the self-hosted mediabox runner; fall back to a GitHub-hosted runner
+  # when it is offline, busy, or the check cannot run (no secret, e.g. fork PRs).
+  # The runners API needs Administration:read, which GITHUB_TOKEN lacks, so this
+  # reads the RUNNER_CHECK_TOKEN secret.
+  pick-runner:
+    name: Pick Fast Tests runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.pick.outputs.runner }}
+    steps:
+      - name: Choose runner
+        id: pick
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          runner='"ubuntu-latest"'
+          if [ -n "${GH_TOKEN:-}" ]; then
+            free=$(gh api "repos/${REPO}/actions/runners" --jq '[.runners[] | select(.status == "online" and .busy == false and ([.labels[].name] | index("mediabox")))] | length' 2>/dev/null || echo 0)
+            if [ "${free:-0}" -gt 0 ]; then
+              runner='["self-hosted","mediabox"]'
+            fi
+          fi
+          echo "runner=${runner}" >> "$GITHUB_OUTPUT"
+          echo "Fast Tests runner: ${runner}"
+
   fast-tests:
     name: Fast Tests (Smoke + Unit)
-    runs-on: ubuntu-latest
+    needs: [pick-runner]
+    runs-on: ${{ fromJSON(needs.pick-runner.outputs.runner) }}
     # Bounds hangs in the SETUP steps, which the test step's own
     # timeout-minutes cannot reach. This job runs two networked installs (apt
     # and npm) before pytest starts; without a job-level cap a stall in either
