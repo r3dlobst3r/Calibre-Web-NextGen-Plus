@@ -16,6 +16,12 @@ is for things you can see or feel when running the app.
 
 ## [Unreleased]
 
+## [v4.1.50] - 2026-10-19
+
+### Removed
+
+- **"Books like this" is withdrawn.** The suggestion strip added in v4.1.49 did not pick books closely enough related to be useful, and it failed to load on every book. The strip, its suggestions request and its Hardcover lookups are gone; nothing else about Hardcover metadata or sync changes.
+
 ## [v4.1.49] - 2026-10-19
 
 ### Added
