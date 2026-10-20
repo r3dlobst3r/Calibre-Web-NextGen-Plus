@@ -8,7 +8,7 @@ local _ = require("gettext")
 local LegacySyncNotice = WidgetContainer:extend{
     name = "cwasync",
     title = _("NextGen Sync has moved"),
-    version = "4.1.49",
+    version = "4.1.50",
 }
 
 local function showMigrationNotice()

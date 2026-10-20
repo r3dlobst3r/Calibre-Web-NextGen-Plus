@@ -218,7 +218,6 @@ from . import reader   # noqa: E402,F401
 from . import reader_fonts  # noqa: E402,F401
 from . import book_reviews  # noqa: E402,F401
 from . import book_ratings  # noqa: E402,F401
-from . import book_similar  # noqa: E402,F401
 from . import ingest_folder_labels  # noqa: E402,F401
 from . import edit     # noqa: E402,F401
 from . import upload   # noqa: E402,F401

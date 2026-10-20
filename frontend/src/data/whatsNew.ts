@@ -56,14 +56,20 @@ export interface WhatsNewRelease {
 /** Newest release first. The `whats-new-populate` skill prepends here. */
 export const WHATS_NEW: WhatsNewRelease[] = [
   {
-    version: 'v4.1.49',
+    version: 'v4.1.50',
     date: '2026-10-19',
     items: [
       {
-        title: 'Find what to read next from a book you liked',
-        body: 'A book with a Hardcover ID now has a Books like this strip under it, with titles that share its genres, best-rated first. Ones you already own are marked and open in your library; the rest open on Hardcover. It needs a Hardcover API key.',
-        category: 'Library',
+        title: 'Books like this is withdrawn',
+        body: 'The suggestion strip added in the last release is gone. Its picks were not accurate enough to be worth showing, and it failed to load. Nothing else about Hardcover changes.',
+        category: 'Under the hood',
       },
+    ],
+  },
+  {
+    version: 'v4.1.49',
+    date: '2026-10-19',
+    items: [
       {
         title: 'Get more books from inside the library',
         body: 'A library search now has a Get more books tab that finds titles online, marks the ones you already own, and downloads the ones you ask for into your library. An admin switches it on and sets up sources under Administration, Downloads.',
