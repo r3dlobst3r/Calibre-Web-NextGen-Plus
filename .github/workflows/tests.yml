@@ -650,7 +650,9 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           SUBJECT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          image="ghcr.io/new-usemame/calibre-web-nextgen"
+          # The image the dev build pushes: this repository's own GHCR package
+          # (new-usemame/calibre-web-nextgen upstream, the fork's name on a fork).
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
           producer_args=()
           if [[ "${{ github.event_name }}" == "pull_request" \
                   && "${{ needs.changed_paths.outputs.build }}" == "true" \
