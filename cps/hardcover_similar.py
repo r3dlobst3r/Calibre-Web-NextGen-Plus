@@ -3,8 +3,9 @@
 """Hardcover "Books like this".
 
 Hardcover's own /similar page is not part of its public GraphQL API, so this
-approximates it: read the book's genre tags, ask Hardcover for its most-read books
-that carry the top genres, and rank them by genre overlap and reader rating.
+approximates it: read the book's genre and mood tags, ask Hardcover for its
+most-read books carrying any of the genres, and rank them by how much of the
+book's genre and mood profile they share, then by rating and popularity.
 """
 import json
 import math
@@ -20,20 +21,18 @@ GRAPHQL_URL = "https://api.hardcover.app/v1/graphql"
 SITE_URL = "https://hardcover.app/books/"
 CACHE_TTL = 24 * 3600
 CACHE_MAX = 512
-MAX_GENRES = 3
-POOL_SIZE = 50
+MAX_GENRES = 5
+MAX_MOODS = 5
+POOL_SIZE = 150
 RESULT_LIMIT = 24
+MIN_READERS = 20
+GENRE_WEIGHT = 6.0
+MOOD_WEIGHT = 3.0
 
-BOOK_GENRES_QUERY = (
-    "query BookGenres($id: Int!) { "
-    "books(where: {id: {_eq: $id}}) { id cached_tags(path: \"Genre\") } }"
-)
-POOL_QUERY = (
-    "query SimilarBooks($a: jsonb!, $b: jsonb!, $n: Int!) { "
-    "books(where: {_and: [{cached_tags: {_contains: $a}}, {cached_tags: {_contains: $b}}]}, "
-    "order_by: {users_count: desc}, limit: $n) { "
-    "id slug title release_year rating ratings_count users_count "
-    "cached_tags(path: \"Genre\") image { url } contributions(limit: 3) { author { name } } } }"
+BOOK_TAGS_QUERY = (
+    "query BookTags($id: Int!) { "
+    "books(where: {id: {_eq: $id}}) { id genres: cached_tags(path: \"Genre\") "
+    "moods: cached_tags(path: \"Mood\") } }"
 )
 
 _cache = {}
@@ -81,32 +80,55 @@ def _decode(value):
     return value
 
 
-def parse_genres(cached_tags):
-    """Genre names from a cached_tags value, most-used first.
+def parse_tags(cached_tags):
+    """``{tag name: count}`` from a cached_tags value, most-used first.
 
     Hardcover returns this scalar as a list of {"tag", "count"} objects, a
-    list of strings, or the same JSON-encoded; accept all of them.
+    list of strings, or the same JSON-encoded; accept all of them. A bare
+    string counts once.
     """
     value = _decode(cached_tags)
     if isinstance(value, dict):
         value = value.get("Genre") or value.get("genre") or []
     if not isinstance(value, list):
-        return []
+        return {}
     scored = []
     for pos, item in enumerate(value):
         if isinstance(item, dict):
             name = item.get("tag") or item.get("name")
-            count = item.get("count") or 0
+            count = item.get("count")
         else:
-            name, count = item, 0
+            name, count = item, 1
         if isinstance(name, str) and name.strip():
-            scored.append((-count if isinstance(count, (int, float)) else 0, pos, name.strip()))
-    return [name for _, _, name in sorted(scored)]
+            count = count if isinstance(count, (int, float)) and count > 0 else 1
+            scored.append((-count, pos, name.strip(), count))
+    return {name: count for _, _, name, count in sorted(scored)}
 
 
-def rank(books, genres, source_id):
-    """Order candidate books by genre overlap, then rating and popularity."""
-    wanted = {g.lower() for g in genres}
+def parse_genres(cached_tags):
+    """Genre names from a cached_tags value, most-used first."""
+    return list(parse_tags(cached_tags))
+
+
+def _overlap(source, theirs):
+    """Share of the source's tag weight that ``theirs`` also carries, 0..1."""
+    total = sum(source.values())
+    if not total:
+        return 0.0
+    mine = {name.lower() for name in theirs}
+    return sum(w for name, w in source.items() if name.lower() in mine) / total
+
+
+def rank(books, genres, moods, source_id):
+    """Order candidate books by shared genre and mood profile, then rating and
+    popularity. ``genres`` and ``moods`` are ``{tag: count}`` for the source.
+
+    A candidate must carry at least half the source's genre weight (a third
+    when the source has four or more genres, which Hardcover often lists with
+    equal counts) and have a minimum readership, so one stray tag or an
+    unread listing cannot qualify.
+    """
+    need = 1 / 3 if len(genres) >= 4 else 0.5
     out = []
     for book in books:
         try:
@@ -115,14 +137,17 @@ def rank(books, genres, source_id):
             continue
         if book_id == source_id or not book.get("title"):
             continue
-        theirs = {g.lower() for g in parse_genres(book.get("cached_tags"))}
-        overlap = len(wanted & theirs)
-        if not overlap:
+        readers = float(book.get("users_count") or 0)
+        if readers < MIN_READERS:
             continue
-        jaccard = overlap / len(wanted | theirs)
+        genre_share = _overlap(genres, parse_tags(book.get("genres")))
+        if genre_share < need:
+            continue
+        mood_share = _overlap(moods, parse_tags(book.get("moods")))
         rating = float(book.get("rating") or 0)
-        popularity = math.log10(1 + float(book.get("users_count") or 0))
-        out.append((jaccard * 10 + rating + popularity, book_id, book))
+        score = (GENRE_WEIGHT * genre_share + MOOD_WEIGHT * mood_share
+                 + rating + math.log10(1 + readers))
+        out.append((score, book_id, book))
     out.sort(key=lambda row: (-row[0], row[1]))
     return [book for _, _, book in out]
 
@@ -146,22 +171,27 @@ def _shape(book):
     }
 
 
+def _pool_query(count):
+    params = ", ".join("$g%d: jsonb!" % i for i in range(count))
+    clauses = ", ".join("{cached_tags: {_contains: $g%d}}" % i for i in range(count))
+    return (
+        "query SimilarBooks(%s, $n: Int!, $min: Int!) { "
+        "books(where: {_and: [{users_count: {_gte: $min}}, {_or: [%s]}]}, "
+        "order_by: {users_count: desc}, limit: $n) { "
+        "id slug title release_year rating ratings_count users_count "
+        "genres: cached_tags(path: \"Genre\") moods: cached_tags(path: \"Mood\") "
+        "image { url } contributions(limit: 3) { author { name } } } }" % (params, clauses)
+    )
+
+
 def _pool(genres, tokens):
-    """Most-read books carrying the top two genres, topped up with the top genre
-    alone when the pair is rare. ``None`` on a failed request."""
-    top = genres[:MAX_GENRES]
-    first = {"Genre": [{"tag": top[0]}]}
-    second = {"Genre": [{"tag": top[1]}]} if len(top) > 1 else first
-    data = _post(POOL_QUERY, {"a": first, "b": second, "n": POOL_SIZE}, tokens)
-    if data is None:
-        return None
-    books = list(data.get("books") or [])
-    if len(books) < RESULT_LIMIT and second is not first:
-        more = _post(POOL_QUERY, {"a": first, "b": first, "n": POOL_SIZE}, tokens)
-        if more is not None:
-            seen = {b.get("id") for b in books}
-            books += [b for b in more.get("books") or [] if b.get("id") not in seen]
-    return books
+    """Most-read books carrying any of the source's top genres. ``None`` on a
+    failed request."""
+    names = list(genres)[:MAX_GENRES]
+    variables = {"g%d" % i: {"Genre": [{"tag": name}]} for i, name in enumerate(names)}
+    variables.update(n=POOL_SIZE, min=MIN_READERS)
+    data = _post(_pool_query(len(names)), variables, tokens)
+    return None if data is None else list(data.get("books") or [])
 
 
 def similar_books(hardcover_id, tokens):
@@ -172,17 +202,18 @@ def similar_books(hardcover_id, tokens):
     if cached and now - cached[0] < CACHE_TTL:
         return cached[1]
 
-    data = _post(BOOK_GENRES_QUERY, {"id": hardcover_id}, tokens)
+    data = _post(BOOK_TAGS_QUERY, {"id": hardcover_id}, tokens)
     if data is None:
         return []
     books = data.get("books") or []
-    genres = parse_genres(books[0].get("cached_tags")) if books else []
+    genres = parse_tags(books[0].get("genres")) if books else {}
+    moods = dict(list(parse_tags(books[0].get("moods")).items())[:MAX_MOODS]) if books else {}
     result = []
     if genres:
         pool = _pool(genres, tokens)
         if pool is None:
             return []
-        result = [_shape(b) for b in rank(pool, genres, hardcover_id)[:RESULT_LIMIT]]
+        result = [_shape(b) for b in rank(pool, genres, moods, hardcover_id)[:RESULT_LIMIT]]
 
     if len(_cache) >= CACHE_MAX:
         _cache.clear()
