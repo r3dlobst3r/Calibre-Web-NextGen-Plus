@@ -50,6 +50,12 @@ def _library_matches(hardcover_ids):
     return owned
 
 
+def hardcover_id(row):
+    """The Hardcover id on a ``get_book_read_archived`` row (the book is ``row.Books``)."""
+    return next((i.val for i in (row.Books.identifiers or [])
+                 if i.type == 'hardcover-id' and str(i.val).isdigit()), None)
+
+
 @api_v1.route('/books/<int:book_id>/similar')
 @login_required_if_no_ano
 def book_similar(book_id):
@@ -58,8 +64,7 @@ def book_similar(book_id):
     book = _visible_book(book_id)
     if not book:
         return _response({'error': {'code': 'not_found', 'message': 'Book not found'}}, 404)
-    hc_id = next((i.val for i in (book.identifiers or [])
-                  if i.type == 'hardcover-id' and str(i.val).isdigit()), None)
+    hc_id = hardcover_id(book)
     tokens = _tokens()
     if not hc_id or not tokens:
         return _response({'available': False, 'items': []})
